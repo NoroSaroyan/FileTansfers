@@ -1,0 +1,58 @@
+package noro.geekbrains.client;
+
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
+import jdk.internal.net.http.hpack.Huffman;
+import sun.security.provider.MD5;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.util.List;
+
+public class Client {
+    public String Username;
+    public String Password;
+
+    public Client(String username, String password) {
+        this.Username = username;
+        this.Password = password;
+    }
+
+    public void Save() {
+
+        try {
+            FileWriter fw = new FileWriter("~/.FILE_TRANSFER");
+            File homeFile = new File("~/.FILE_TRANSFER");
+            if (homeFile.createNewFile()) {
+                fw.write(this.Username);
+                fw.write(":");
+                fw.write(this.Password);
+                fw.close();
+            } else {
+                System.out.println("File" + homeFile.getPath() + "already exists");
+            }
+        } catch (IOException e) {
+            System.out.println("Error occurred");
+            e.printStackTrace();
+        }
+    }
+
+    public static Client login() throws Exception {
+        File file = new File("~/.FILE_TRANSFER");
+
+        List<String> lines = Files.readAllLines(file.toPath());
+        if (lines.size() < 1) {
+            throw new Exception();
+        }
+
+        String[] split = lines.get(0).split(":");
+        if (split.length != 2) {
+            throw new Exception();
+        }
+
+        return new Client(split[0], split[1]);
+    }
+
+    public void login(String username, String password) {
+
+    }
+}

@@ -1,9 +1,5 @@
 package noro.geekbrains.client;
 
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
-import jdk.internal.net.http.hpack.Huffman;
-import sun.security.provider.MD5;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.util.List;

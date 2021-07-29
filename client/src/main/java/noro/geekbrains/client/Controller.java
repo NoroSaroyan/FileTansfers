@@ -1,5 +1,6 @@
 package noro.geekbrains.client;
 
+import com.sun.security.ntlm.Server;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -24,6 +25,8 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -41,7 +44,7 @@ public class Controller implements Initializable {
     public HBox msgPanel;
     @FXML
     public ListView<String> clientList;
-
+    public List<Client> clients = new ArrayList<>();
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
@@ -95,7 +98,6 @@ public class Controller implements Initializable {
             socket = new Socket(IP_ADDRESS, PORT);
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
-
             new Thread(() -> {
                 try {
                     // цикл аутентификации
@@ -195,8 +197,8 @@ public class Controller implements Initializable {
             out.writeUTF(String.format("%s %s %s", Command.AUTH, loginField.getText().trim(), passwordField.getText().trim()));
 
         } catch (NullPointerException | ConnectException e) {
-           // e.printStackTrace();//TODO cannot connect to server
-           // Main.notifier("Application error", "Cannot connect to Server");
+            // e.printStackTrace();//TODO cannot connect to server
+            // Main.notifier("Application error", "Cannot connect to Server");
             textArea.appendText("Application error: Cannot connect to Server");
 
         } catch (IOException e) {

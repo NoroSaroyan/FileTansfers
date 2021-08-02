@@ -52,7 +52,7 @@ public class Controller implements Initializable {
     private final String IP_ADDRESS = "localhost";
 
     private boolean authenticated;
-    private String nickname;
+    private String username;
     private Stage stage;
     private Stage regStage;
     private String login;
@@ -68,11 +68,11 @@ public class Controller implements Initializable {
         clientList.setManaged(authenticated);
 
         if (!authenticated) {
-            nickname = "";
+            username = "";
 
         }
         textArea.clear();
-        setTitle(nickname);
+        setTitle(username);
     }
 
     @Override
@@ -106,11 +106,11 @@ public class Controller implements Initializable {
 
                         if (str.startsWith("/")) {
                             if (str.equals(Command.END)) {
-                                throw new RuntimeException("Сервак нас отключает");
+                                throw new RuntimeException("Server disconnected");
                             }
                             if (str.startsWith(Command.AUTH_OK)) {
                                 String[] token = str.split("\\s");
-                                nickname = token[1];
+                                username = token[1];
 
                                 setAuthenticated(true);
                                 break;
@@ -147,9 +147,9 @@ public class Controller implements Initializable {
                             }
 
                             //==============//
-                            if (str.startsWith("/yournickis ")) {
-                                nickname = str.split(" ")[1];
-                                setTitle(nickname);
+                            if (str.startsWith("/my_username ")) {
+                                username = str.split(" ")[1];
+                                setTitle(username);
                             }
                             //==============//
 
@@ -208,12 +208,12 @@ public class Controller implements Initializable {
         }
     }
 
-    private void setTitle(String nickname) {
+    private void setTitle(String name) {
         Platform.runLater(() -> {
-            if (nickname.equals("")) {
-                stage.setTitle("Best chat of World");
+            if (name.equals("")) {
+                stage.setTitle("File Transfer");
             } else {
-                stage.setTitle(String.format("Best chat of World - [ %s ]", nickname));
+                stage.setTitle(String.format("File Transfer - [ %s ]", name));
             }
         });
     }
@@ -240,7 +240,7 @@ public class Controller implements Initializable {
             regController.setController(this);
 
             regStage = new Stage();
-            regStage.setTitle("Best chat of World registration");
+            regStage.setTitle("Sign Up ");
             regStage.setScene(new Scene(root, 450, 350));
             regStage.initStyle(StageStyle.UTILITY);
             regStage.initModality(Modality.APPLICATION_MODAL);
@@ -250,12 +250,12 @@ public class Controller implements Initializable {
         }
     }
 
-    public void registration(String login, String password, String nickname) {
+    public void registration(String login, String password) {
         if (socket == null || socket.isClosed()) {
             connect();
         }
         try {
-            out.writeUTF(String.format("%s %s %s %s", Command.REG, login, password, nickname));
+            out.writeUTF(String.format("%s %s %s %s", Command.REG, login, password));
         } catch (IOException e) {
             e.printStackTrace();
         }

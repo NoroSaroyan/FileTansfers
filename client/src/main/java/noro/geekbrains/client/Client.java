@@ -1,7 +1,5 @@
 package noro.geekbrains.client;
 
-import noro.geekbrains.server.Server;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.util.List;
@@ -18,7 +16,7 @@ public class Client {
 
     public void add(Client client) throws Exception {
         if (client != null) {
-            Server.users.add(client);
+            //todo
         } else {
             throw new IOException("client is not valid");
         }
@@ -42,7 +40,11 @@ public class Client {
         }
     }
 
-    public static Client login() throws Exception {
+    /*
+    auto login for client.
+     */
+    public static Client autoLogin() throws Exception {
+
         File file = new File("~/.FILE_TRANSFER");
         List<String> lines = Files.readAllLines(file.toPath());
         if (lines.size() < 1) {
@@ -54,15 +56,21 @@ public class Client {
             throw new Exception();
         }
         Client cl = new Client(split[0], split[1]);
-        int index = Server.users.indexOf(cl);
-        return  Server.users.get(index);
+        // TODO: 02.08.2021
+        return cl;
     }
 
-    public static Client login(String username, String password) {
-        Client client = new Client(username, password);
-        int index = Server.users.indexOf(client);
-        return Server.users.get(index);
-    }
+    public static Client login(String username, String password) throws Exception {
+        try {
+            //client sends command /login
+            //server answers (true or false) by completing query in sqlhandler.
+            Client client = new Client(username, password);
+            //todo
 
+        } catch (RuntimeException e) {
+            e.getMessage();
+        }
+        throw new IOException();
+    }
 
 }

@@ -8,14 +8,13 @@
 <?import javafx.scene.control.ListView?>
 <?import java.awt.TextField?>
 <VBox fx:controller="noro.geekbrains.client.RegController"
-      xmlns:fx="http://javafx.com/fxml" alignment="center">
+      xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.2" alignment="center">
     <stylesheets>
         <URL value="@/css/style.css"/>
     </stylesheets>
 
     <TextField fx:id="loginField" promptText="login"/>
     <PasswordField fx:id="passwordField" promptText="password"/>
-    <TextField fx:id="nicknameField" promptText="nickname"/>
     <TextArea fx:id="textArea" VBox.vgrow="ALWAYS"/>
 
     <Button text="reg" minWidth="100" onAction="#tryToReg"/>

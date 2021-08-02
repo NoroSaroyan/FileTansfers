@@ -13,8 +13,6 @@ public class RegController {
     @FXML
     private PasswordField passwordField;
     @FXML
-    private TextField nicknameField;
-    @FXML
     private TextArea textArea;
 
     private Controller controller;
@@ -25,23 +23,22 @@ public class RegController {
 
     public void setResultTryToReg(String command) {
         if (command.equals(Command.REG_OK)) {
-            textArea.appendText("Регистрация прошла успешно\n");
+            textArea.appendText("Registered Successfully\n");
         }
         if (command.equals(Command.REG_NO)) {
-            textArea.appendText("Логин или никнейм уже заняты\n");
+            textArea.appendText("Username Taken\n");
         }
     }
 
     public void tryToReg(ActionEvent actionEvent) {
         String login = loginField.getText().trim();
         String password = passwordField.getText().trim();
-        String nickname = nicknameField.getText().trim();
 
-        if (login.length() * password.length() * nickname.length() == 0) {
+        if (login.length() * password.length() == 0) {
             return;
         }
 
-        controller.registration(login, password, nickname);
+        controller.registration(login, password);
     }
 }
 

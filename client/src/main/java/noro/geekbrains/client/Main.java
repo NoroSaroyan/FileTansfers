@@ -19,7 +19,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("/sample.fxml"));
-        primaryStage.setTitle("Best chat of World");
+        primaryStage.setTitle("File Transfer");
         primaryStage.setScene(new Scene(root, 500, 375));
         primaryStage.show();
     }

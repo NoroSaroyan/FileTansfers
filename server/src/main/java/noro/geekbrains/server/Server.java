@@ -1,25 +1,17 @@
 package noro.geekbrains.server;
 
-
-import noro.geekbrains.client.Client;
-import noro.geekbrains.client.Controller;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Server {
-
-    public static List<Client> users = new ArrayList<>();
     private final int PORT = 8189;
     private ServerSocket server;
     private Socket socket;

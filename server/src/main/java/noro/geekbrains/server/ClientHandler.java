@@ -39,8 +39,8 @@ public class ClientHandler {
 
                         //если команда аутентификация
                         if (str.startsWith(Command.AUTH)) {
-                            String[] token = str.split("\\s", 2);
-                            if (token.length < 2) {
+                            String[] token = str.split("\\s", 3);
+                            if (token.length < 3) {
                                 System.out.println("Error " + Arrays.toString(token));
                                 continue;
                             }

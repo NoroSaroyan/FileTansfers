@@ -29,14 +29,10 @@ public class Server {
     public Server() {
         clients = new CopyOnWriteArrayList<>();
         executorService = Executors.newCachedThreadPool();
-        authService = new SimpleAuthService();
-        //==============//
-//        if (!SQLHandler.connect()) {
-//            throw new RuntimeException("Не удалось подключиться к БД");
-//        }
-//        authService = new DBAuthServise();
-        //==============//
-
+        if (!SQLHandler.connect()) {
+            throw new RuntimeException("Не удалось подключиться к БД");
+        }
+        authService = new DatabaseAuthService();
 
         try {
             server = new ServerSocket(PORT);
@@ -52,7 +48,7 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            // SQLHandler.disconnect();
+            //SQLHandler.disconnect();
             try {
                 socket.close();
             } catch (IOException e) {

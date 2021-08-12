@@ -255,7 +255,7 @@ public class Controller implements Initializable {
             connect();
         }
         try {
-            out.writeUTF(String.format("%s %s %s %s", Command.REG, login, password));
+            out.writeUTF(String.format("%s %s %s", Command.REG, login, password));
         } catch (IOException e) {
             e.printStackTrace();
         }

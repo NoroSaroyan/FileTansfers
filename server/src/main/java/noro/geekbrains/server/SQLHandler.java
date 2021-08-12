@@ -13,7 +13,7 @@ public class SQLHandler {
     public static boolean connect() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/filetransfer");
+            connection = DriverManager.getConnection("jdbc:mysql://root:16012004@localhost:3306/FileTransfer");
             prepareAllStatements();
             return true;
         } catch (Exception e) {
@@ -23,11 +23,11 @@ public class SQLHandler {
     }
 
     private static void prepareAllStatements() throws SQLException {
-        psGetUserName = connection.prepareStatement("SELECT username FROM clients WHERE username = ? AND password = ?;");
-        psRegistration = connection.prepareStatement("INSERT INTO clients(username, password) VALUES (? ,? );");
-        psChangeUserName = connection.prepareStatement("UPDATE clients SET username = ? WHERE username = ? AND password = ? ;");
-        psChangePassword = connection.prepareStatement("Update clients SET password = ? WHERE username = ? AND Password = ?;");
-        psLogin = connection.prepareStatement("Select username from clients where username = ? AND password = ?;");
+        psGetUserName = connection.prepareStatement("SELECT name FROM clients WHERE name = ? AND password = ?;");
+        psRegistration = connection.prepareStatement("INSERT INTO clients(name, password) VALUES (? ,? );");
+        psChangeUserName = connection.prepareStatement("UPDATE clients SET name = ? WHERE name = ? AND password = ? ;");
+        psChangePassword = connection.prepareStatement("Update clients SET password = ? WHERE name = ? AND Password = ?;");
+        psLogin = connection.prepareStatement("Select name from clients where name = ? AND password = ?;");
     }
 
     public static boolean registration(String login, String password) {

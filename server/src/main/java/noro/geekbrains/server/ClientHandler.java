@@ -4,6 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class ClientHandler {
     private Server server;
@@ -12,6 +13,7 @@ public class ClientHandler {
     private DataOutputStream out;
 
     private String login;
+    private String password;
 
     public ClientHandler(Server server, Socket socket) {
         try {
@@ -31,6 +33,7 @@ public class ClientHandler {
                         //если команда отключиться
                         if (str.equals(Command.END)) {
                             out.writeUTF(Command.END);
+                            System.out.println("");
                             throw new RuntimeException("Клиент захотел отключиться");
                         }
 
@@ -38,34 +41,45 @@ public class ClientHandler {
                         if (str.startsWith(Command.AUTH)) {
                             String[] token = str.split("\\s", 2);
                             if (token.length < 2) {
+                                System.out.println("Error " + Arrays.toString(token));
                                 continue;
                             }
                             login = token[1];
-                            if (login != null) {
-                                if (!server.isLoginAuthenticated(login)) {
-                                    sendMsg(Command.AUTH_OK + " " + login);
-                                    server.subscribe(this);
-                                    System.out.println("client: " + socket.getRemoteSocketAddress() +
-                                            " connected with login: " + login);
-                                    break;
-                                } else {
-                                    sendMsg("Данная учетная запись уже используется");
+                            password = token[2];
+                            if (login != null && password != null) {
+                                if (server.getAuthService().login(login, password))
+                                    if (!server.isLoginAuthenticated(login)) {
+                                        sendMsg(Command.AUTH_OK + " " + login);
+                                        server.subscribe(this);
+                                        System.out.println("client: " + socket.getRemoteSocketAddress() +
+                                                " connected with login: " + login);
+                                        break;
+                                    } else {
+                                        System.out.println("already using");
+                                        sendMsg("Данная учетная запись уже используется");
+                                    }
+                                else {
+                                    sendMsg("Неверный логин / пароль");
                                 }
                             } else {
-                                sendMsg("Неверный логин / пароль");
+                                sendMsg("null values");
+                                throw new RuntimeException("Null values");
                             }
                         }
 
                         //если команда регистрация
                         if (str.startsWith(Command.REG)) {
-                            String[] token = str.split("\\s", 4);
-                            if (token.length < 4) {
+                            String[] token = str.split("\\s", 3);
+                            if (token.length < 3) {
+                                System.out.println("error " + Arrays.toString(token));
                                 continue;
                             }
                             boolean regSuccess = server.getAuthService()
                                     .registration(token[1], token[2]);
                             if (regSuccess) {
-                                sendMsg(Command.REG_OK);
+                                    sendMsg(Command.REG_OK);
+                                    System.out.println("Reg ok");
+                                    System.out.println(Arrays.toString(token));
                             } else {
                                 sendMsg(Command.REG_NO);
                             }

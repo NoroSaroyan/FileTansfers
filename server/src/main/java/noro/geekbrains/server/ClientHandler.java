@@ -89,7 +89,7 @@ public class ClientHandler {
                     //цикл работы
                     while (true) {
                         String str = in.readUTF();
-
+                        server.broadcastMsg(this,str);
                         if (str.startsWith("/")) {
                             if (str.equals(Command.END)) {
                                 out.writeUTF(Command.END);
@@ -102,16 +102,6 @@ public class ClientHandler {
                                     continue;
                                 }
                                 server.privateMsg(this, token[1], token[2]);
-                            }
-                            if (str.startsWith("/chnick ")) {
-                                String[] token = str.split("\\s+", 2);
-                                if (token.length < 2) {
-                                    continue;
-                                }
-                                if (token[1].contains(" ")) {
-                                    sendMsg("Ник не может содержать пробелов!");
-                                    continue;
-                                }
                             }
                         } else {
                             server.broadcastMsg(this, str);

@@ -16,12 +16,12 @@
         <Button minWidth="100" onAction="#showRegWindow" text="reg" />
     </HBox>
 
-    <HBox VBox.vgrow="ALWAYS">
-        <ListView fx:id="clientList" managed="false" minWidth="100" onMouseReleased="#clientListMouseReleased" visible="false" />
-        <TextArea fx:id="textArea" editable="false" HBox.hgrow="ALWAYS" />
-    </HBox>
-    <HBox fx:id="msgPanel" visible="false" managed="false">
-        <TextField fx:id="textField" HBox.hgrow="ALWAYS" promptText="input text" onAction="#sendMsg"/>
-        <Button text="send" onAction="#sendMsg"/>
-    </HBox>
+<!--    <HBox VBox.vgrow="ALWAYS">-->
+<!--        <ListView fx:id="clientList" managed="false" minWidth="100" onMouseReleased="#clientListMouseReleased" visible="false" />-->
+<!--        <TextArea fx:id="textArea" editable="false" HBox.hgrow="ALWAYS" />-->
+<!--    </HBox>-->
+<!--    <HBox fx:id="msgPanel" visible="true" managed="true">-->
+<!--        <TextField fx:id="textField" HBox.hgrow="ALWAYS" promptText="input text" onAction="#sendMsg"/>-->
+<!--        <Button text="send" onAction="#sendMsg"/>-->
+<!--    </HBox>-->
 </VBox>

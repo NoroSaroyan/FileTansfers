@@ -95,9 +95,6 @@ public class Controller implements Initializable {
                         String str = in.readUTF();
 
                         if (str.startsWith("/")) {
-                            if (str.equals(Command.END)) {
-                                throw new RuntimeException("Server disconnected");
-                            }
                             if (str.startsWith(Command.AUTH_OK)) {
                                 String[] token = str.split("\\s");
                                 username = token[1];

@@ -9,6 +9,10 @@ public class SQLHandler {
     private static PreparedStatement psChangeUserName;
     private static PreparedStatement psChangePassword;
     private static PreparedStatement psLogin;
+    private static PreparedStatement psInsertFile;
+    private static PreparedStatement psGetFile;
+    private static PreparedStatement psGetFileByPath;
+    private static PreparedStatement psGetFiles;
 
     public static boolean connect() {
         try {
@@ -28,6 +32,56 @@ public class SQLHandler {
         psChangeUserName = connection.prepareStatement("UPDATE clients SET name = ? WHERE name = ? AND password = ? ;");
         psChangePassword = connection.prepareStatement("Update clients SET password = ? WHERE name = ? AND Password = ?;");
         psLogin = connection.prepareStatement("Select name from clients where name = ? AND password = ?;");
+        psInsertFile = connection.prepareStatement("Insert INTO files(id , name , username , path) VALUES (?,?,?,?);");
+        psGetFile = connection.prepareStatement("Select name from files where name = ? AND username = ?;");
+        psGetFileByPath = connection.prepareStatement("Select name from files where path = ?;");
+        psGetFiles = connection.prepareStatement("Select * from files where username = ?;");
+
+    }
+
+    //String id here , int id in db , will it work ?
+    public static boolean insertFile(String name, String username, String path, String id) {
+        try {
+            psInsertFile.setString(1, id);
+            psInsertFile.setString(2, name);
+            psInsertFile.setString(3, username);
+            psInsertFile.setString(4, path);
+            psInsertFile.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public static boolean getAllFiles(String username) {
+        try {
+            psGetFiles.setString(1, username);
+            psGetFiles.execute();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public static boolean getFile(String path) {
+        try {
+            psGetFileByPath.setString(1, path);
+            psGetFileByPath.execute();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public static boolean getFile(String filename, String username) {
+        try {
+            psGetFile.setString(1, filename);
+            psGetFile.setString(2, username);
+            psGetFile.execute();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     public static boolean registration(String login, String password) {
@@ -49,6 +103,7 @@ public class SQLHandler {
             psChangeUserName.setString(2, oldUsername);
             psChangePassword.setString(3, password);
             psChangeUserName.executeUpdate();
+
             return true;
         } catch (SQLException e) {
             return false;
@@ -78,7 +133,6 @@ public class SQLHandler {
             return false;
         }
     }
-
 
     public static void disconnect() {
         try {

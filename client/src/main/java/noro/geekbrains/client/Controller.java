@@ -1,6 +1,5 @@
 package noro.geekbrains.client;
 
-import com.sun.security.ntlm.Server;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -8,17 +7,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
-import javax.management.Notification;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -56,12 +51,9 @@ public class Controller implements Initializable {
         this.authenticated = authenticated;
         authPanel.setVisible(!authenticated);
         authPanel.setManaged(!authenticated);
-
         if (!authenticated) {
             username = "";
-
         }
-
         setTitle(username);
     }
 
@@ -98,7 +90,6 @@ public class Controller implements Initializable {
                             if (str.startsWith(Command.AUTH_OK)) {
                                 String[] token = str.split("\\s");
                                 username = token[1];
-
                                 setAuthenticated(true);
                                 break;
                             }
@@ -115,7 +106,9 @@ public class Controller implements Initializable {
                     //цикл работы
                     while (true) {
                         String str = in.readUTF();
-                        System.out.println("<<- " + str);
+
+                        System.out.println("<<-" + str);
+
 //
 //                        if (str.startsWith("/")) {
 //                            if (str.equals(Command.END)) {
@@ -224,5 +217,13 @@ public class Controller implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void selectFile(ActionEvent actionEvent) {
+        System.out.println("/selectFile button");
+    }
+
+    public void clientListMouseReleased(MouseEvent mouseEvent) {
+
     }
 }

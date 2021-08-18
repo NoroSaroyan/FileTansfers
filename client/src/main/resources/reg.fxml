@@ -6,6 +6,7 @@
 <?import java.net.URL?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.ListView?>
+
 <VBox fx:controller="noro.geekbrains.client.RegController"
       xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.2" alignment="center">
     <stylesheets>
@@ -17,6 +18,4 @@
     <TextArea fx:id="textArea" VBox.vgrow="ALWAYS"/>
 
     <Button text="reg" minWidth="100" onAction="#tryToReg"/>
-
-
 </VBox>

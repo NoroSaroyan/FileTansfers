@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.List;
 
 public class ClientHandler {
     private Server server;
@@ -51,8 +52,12 @@ public class ClientHandler {
                                     if (!server.isLoginAuthenticated(login)) {
                                         sendMsg(Command.AUTH_OK + " " + login);
                                         server.subscribe(this);
+                                        //is it right?
+                                        List<DbFiles> userFiles = SQLHandler.getUserFiles(login);
+                                        sendMsg(userFiles.toString());
                                         System.out.println("client: " + socket.getRemoteSocketAddress() +
                                                 " connected with login: " + login);
+
                                         break;
                                     } else {
                                         System.out.println("already using");
@@ -77,9 +82,9 @@ public class ClientHandler {
                             boolean regSuccess = server.getAuthService()
                                     .registration(token[1], token[2]);
                             if (regSuccess) {
-                                    sendMsg(Command.REG_OK);
-                                    System.out.println("Reg ok");
-                                    System.out.println(Arrays.toString(token));
+                                sendMsg(Command.REG_OK);
+                                System.out.println("Reg ok");
+                                System.out.println(Arrays.toString(token));
                             } else {
                                 sendMsg(Command.REG_NO);
                             }

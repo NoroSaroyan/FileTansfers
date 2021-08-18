@@ -4,24 +4,26 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="center" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.2" fx:controller="noro.geekbrains.client.Controller">
+<VBox alignment="center" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.2"
+      fx:controller="noro.geekbrains.client.Controller">
     <stylesheets>
-        <URL value="@/css/style.css" />
+        <URL value="@/css/style.css"/>
     </stylesheets>
 
     <HBox fx:id="authPanel">
-        <TextField fx:id="loginField" prefHeight="39.0" prefWidth="219.0" promptText="login" HBox.hgrow="ALWAYS" />
-        <PasswordField fx:id="passwordField" onAction="#tryToAuth" promptText="password" HBox.hgrow="ALWAYS" />
-        <Button minWidth="100" onAction="#tryToAuth" text="auth" />
-        <Button minWidth="100" onAction="#showRegWindow" text="reg" />
+        <TextField fx:id="loginField" prefHeight="39.0" prefWidth="219.0" promptText="login" HBox.hgrow="ALWAYS"/>
+        <PasswordField fx:id="passwordField" onAction="#tryToAuth" promptText="password" HBox.hgrow="ALWAYS"/>
+        <Button minWidth="100" onAction="#tryToAuth" text="auth"/>
+        <Button minWidth="100" onAction="#showRegWindow" text="reg"/>
     </HBox>
 
-<!--    <HBox VBox.vgrow="ALWAYS">-->
-<!--        <ListView fx:id="clientList" managed="false" minWidth="100" onMouseReleased="#clientListMouseReleased" visible="false" />-->
-<!--        <TextArea fx:id="textArea" editable="false" HBox.hgrow="ALWAYS" />-->
-<!--    </HBox>-->
-<!--    <HBox fx:id="msgPanel" visible="true" managed="true">-->
-<!--        <TextField fx:id="textField" HBox.hgrow="ALWAYS" promptText="input text" onAction="#sendMsg"/>-->
-<!--        <Button text="send" onAction="#sendMsg"/>-->
-<!--    </HBox>-->
+    <HBox fx:id="selectFile">
+        <Button minWidth="100" onAction="#selectFile" text="selectFile"/>
+    </HBox>
+
+    <HBox VBox.vgrow="ALWAYS">
+        <ListView fx:id="clientList" managed="false" minWidth="100" onMouseReleased="#clientListMouseReleased"
+                  visible="false"/>
+        <TextArea fx:id="textArea" editable="false" HBox.hgrow="ALWAYS"/>
+    </HBox>
 </VBox>

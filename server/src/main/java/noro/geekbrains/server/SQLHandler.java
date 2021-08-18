@@ -1,18 +1,19 @@
 package noro.geekbrains.server;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SQLHandler {
     private static Connection connection;
-    private static PreparedStatement psGetUserName;
     private static PreparedStatement psRegistration;
     private static PreparedStatement psChangeUserName;
     private static PreparedStatement psChangePassword;
     private static PreparedStatement psLogin;
     private static PreparedStatement psInsertFile;
-    private static PreparedStatement psGetFile;
-    private static PreparedStatement psGetFileByPath;
-    private static PreparedStatement psGetFiles;
+    private static PreparedStatement psGetUserFiles;
+    private static PreparedStatement psGetFileById;
+
 
     public static boolean connect() {
         try {
@@ -27,57 +28,67 @@ public class SQLHandler {
     }
 
     private static void prepareAllStatements() throws SQLException {
-        psGetUserName = connection.prepareStatement("SELECT name FROM clients WHERE name = ? AND password = ?;");
         psRegistration = connection.prepareStatement("INSERT INTO clients(name, password) VALUES (? ,? );");
         psChangeUserName = connection.prepareStatement("UPDATE clients SET name = ? WHERE name = ? AND password = ? ;");
         psChangePassword = connection.prepareStatement("Update clients SET password = ? WHERE name = ? AND Password = ?;");
         psLogin = connection.prepareStatement("Select name from clients where name = ? AND password = ?;");
-        psInsertFile = connection.prepareStatement("Insert INTO files(id , name , username , path) VALUES (?,?,?,?);");
-        psGetFile = connection.prepareStatement("Select name from files where name = ? AND username = ?;");
-        psGetFileByPath = connection.prepareStatement("Select name from files where path = ?;");
-        psGetFiles = connection.prepareStatement("Select * from files where username = ?;");
-
+        psInsertFile = connection.prepareStatement("Insert INTO files(name , username , path) VALUES (?,?,?);");
+        psGetUserFiles = connection.prepareStatement("select * from files where username = ?;");
+        psGetFileById = connection.prepareStatement("Select * from files where id = ?;");
     }
 
-    //String id here , int id in db , will it work ?
-    public static boolean insertFile(String name, String username, String path, String id) {
+    public static List<DbFiles> getUserFiles(String username) {
+        List<DbFiles> files = new ArrayList<>();
+        ResultSet rs = null;
         try {
-            psInsertFile.setString(1, id);
-            psInsertFile.setString(2, name);
-            psInsertFile.setString(3, username);
-            psInsertFile.setString(4, path);
+            psGetUserFiles.setString(1, username);
+            rs = psGetUserFiles.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                String path = rs.getString("path");
+                files.add(new DbFiles(id, name, username, path));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException throwables) {
+                    throwables.printStackTrace();
+                }
+            }
+        }
+        return files;
+    }
+
+    public static DbFiles getFilesById(int id) {
+        ResultSet rs;
+        try {
+            psGetFileById.setInt(1, id);
+            rs = psGetFileById.executeQuery();
+            if (rs.next()) {
+                String username = rs.getString("username");
+                String name = rs.getString("name");
+                String path = rs.getString("path");
+                rs.close();
+                return new DbFiles(id, name, username, path);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
+    public static boolean insertFile(String name, String username, String path) {
+        try {
+            psInsertFile.setString(1, name);
+            psInsertFile.setString(2, username);
+            psInsertFile.setString(3, path);
             psInsertFile.executeUpdate();
-            return true;
-        } catch (SQLException e) {
-            return false;
-        }
-    }
-
-    public static boolean getAllFiles(String username) {
-        try {
-            psGetFiles.setString(1, username);
-            psGetFiles.execute();
-            return true;
-        } catch (SQLException e) {
-            return false;
-        }
-    }
-
-    public static boolean getFile(String path) {
-        try {
-            psGetFileByPath.setString(1, path);
-            psGetFileByPath.execute();
-            return true;
-        } catch (SQLException e) {
-            return false;
-        }
-    }
-
-    public static boolean getFile(String filename, String username) {
-        try {
-            psGetFile.setString(1, filename);
-            psGetFile.setString(2, username);
-            psGetFile.execute();
             return true;
         } catch (SQLException e) {
             return false;

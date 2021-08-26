@@ -1,9 +1,13 @@
 package noro.geekbrains.server;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import main.Command;
+import main.DbFiles;
+import main.Mapper;
+import sun.misc.IOUtils;
+
+import java.io.*;
 import java.net.Socket;
+import java.nio.file.*;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,12 +56,10 @@ public class ClientHandler {
                                     if (!server.isLoginAuthenticated(login)) {
                                         sendMsg(Command.AUTH_OK + " " + login);
                                         server.subscribe(this);
-                                        //is it right?
                                         List<DbFiles> userFiles = SQLHandler.getUserFiles(login);
-                                        sendMsg(userFiles.toString());
+                                        sendMsg(Command.DBFILES_OK + Mapper.objectToString(userFiles));
                                         System.out.println("client: " + socket.getRemoteSocketAddress() +
                                                 " connected with login: " + login);
-
                                         break;
                                     } else {
                                         System.out.println("already using");
@@ -94,40 +96,35 @@ public class ClientHandler {
                     //цикл работы
                     while (true) {
                         String str = in.readUTF();
-
                         if (str.startsWith("/")) {
                             if (str.equals(Command.END)) {
                                 out.writeUTF(Command.END);
                                 break;
                             }
-
-                        /*    if (str.startsWith(Command.PRIVATE_MSG)) {
-                                String[] token = str.split("\\s", 3);
-                                if (token.length < 3) {
-                                    continue;
+                            if (str.startsWith(Command.INSERT_FILE)) {
+                                //TODO how to read all Bytes of InputStream
+                                String[] data = str.split(Command.INSERT_FILE, 2);
+                                DbFiles file = Mapper.stringToObject(data[1]);
+                                if (file != null) {
+                                    byte[] bytes = IOUtils.readAllBytes(in);
+                                    String path = "D:\\FileTransfers\\Users\\" + this.login + "\\" + file.Name;
+                                    if (saveContentToFile(bytes, file.Path)) {
+                                        SQLHandler.insertFile(file.Name, file.Username, file.Path);
+                                        sendMsg(Command.INSERT_OK);
+                                    } else {
+                                        out.writeUTF(str + ":" + Command.INSERT_FAILED);
+                                    }
+                                } else {
+                                    server.broadcastMsg(this, str);
                                 }
-                                server.privateMsg(this, token[1], token[2]);
+
                             }
-
-                            if (str.startsWith("/chnick ")) {
-                                String[] token = str.split("\\s+", 2);
-                                if (token.length < 2) {
-                                    continue;
-                                }
-                                if (token[1].contains(" ")) {
-                                    sendMsg("Ник не может содержать пробелов!");
-                                    continue;
-                                }
-                            }
-                            */
-
-                        } else {
-                            server.broadcastMsg(this, str);
                         }
+
                     }
                 } catch (RuntimeException e) {
                     System.out.println(e.getMessage());
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
                     server.unsubscribe(this);
@@ -140,9 +137,11 @@ public class ClientHandler {
                 }
             });
 
-        } catch (IOException e) {
+        } catch (
+                IOException e) {
             e.printStackTrace();
         }
+
     }
 
     public void sendMsg(String msg) {
@@ -155,5 +154,44 @@ public class ClientHandler {
 
     public String getLogin() {
         return login;
+    }
+
+    //Saves users file to hard drive
+    public static boolean saveContentToFile(byte[] arr, String path) throws Exception {
+        if (!exist(path)) {
+            if (!createDirectory(path)) {
+                return false;
+            }
+        }
+        try {
+            OutputStream out = new FileOutputStream(new File(path));
+            out.write(arr);
+            out.close();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public static boolean exist(String path) {
+        return new File(path).exists();
+        //return (path).toFile().exists();
+    }
+
+    public static boolean createDirectory(String p) {
+        if (!exist(p)) {
+            try {
+                Path path = Paths.get(p).getParent();
+                Files.createDirectories(path);
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            return false;
+        }
+        return false;
     }
 }

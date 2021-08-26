@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.net.*?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="center" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.2"
+<VBox alignment="center" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="noro.geekbrains.client.Controller">
     <stylesheets>
         <URL value="@/css/style.css"/>
@@ -16,14 +17,31 @@
         <Button minWidth="100" onAction="#tryToAuth" text="auth"/>
         <Button minWidth="100" onAction="#showRegWindow" text="reg"/>
     </HBox>
+    <HBox fx:id="selectFile"/>
 
-    <HBox fx:id="selectFile">
-        <Button minWidth="100" onAction="#selectFile" text="selectFile"/>
-    </HBox>
-
-    <HBox VBox.vgrow="ALWAYS">
-        <ListView fx:id="clientList" managed="false" minWidth="100" onMouseReleased="#clientListMouseReleased"
+    <HBox prefHeight="335.0" prefWidth="738.0" VBox.vgrow="ALWAYS">
+        <ListView fx:id="files" managed="false" minWidth="300" onMouseReleased="#clientListMouseReleased"
                   visible="false"/>
-        <TextArea fx:id="textArea" editable="false" HBox.hgrow="ALWAYS"/>
+        <TextArea fx:id="textArea" editable="false" prefHeight="338.0" prefWidth="560.0" HBox.hgrow="ALWAYS"/>
+        <Button layoutX="140.0" layoutY="140.0" minWidth="100.0" onAction="#saveFileToComputer" prefHeight="38.0"
+                prefWidth="124.0" text="Save" HBox.hgrow="ALWAYS">
+            <HBox.margin>
+                <Insets top="100.0"/>
+            </HBox.margin>
+            <opaqueInsets>
+                <Insets/>
+            </opaqueInsets>
+        </Button>
+
+        <Button minWidth="100.0" onAction="#selectFile" text="Select File" HBox.hgrow="NEVER">
+            <HBox.margin>
+                <Insets top="300.0"/>
+            </HBox.margin>
+            <opaqueInsets>
+                <Insets/>
+            </opaqueInsets>
+        </Button>
     </HBox>
+
+
 </VBox>

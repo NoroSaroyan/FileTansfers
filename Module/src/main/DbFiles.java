@@ -1,10 +1,19 @@
-package noro.geekbrains.server;
+package main;
 
-public class DbFiles {
+import java.io.Serializable;
+
+public class DbFiles implements Serializable {
+    //@JsonProperty
     public Integer Id;
+    //@JsonProperty
     public String Name;
+    //@JsonProperty
     public String Username;
+    // @JsonProperty
     public String Path;
+
+    public DbFiles() {
+    }
 
     public DbFiles(Integer id, String name, String username, String path) {
         Id = id;
@@ -12,6 +21,7 @@ public class DbFiles {
         this.Username = username;
         this.Path = path;
     }
+
     @Override
     public String toString() {
         return "DbFiles{" +

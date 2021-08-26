@@ -6,6 +6,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import main.Command;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class RegController {
     @FXML
@@ -15,11 +21,14 @@ public class RegController {
     @FXML
     private TextArea textArea;
 
+    private String path = "D:\\FileTransfers\\Users\\";
+
     private Controller controller;
 
     public void setController(Controller controller) {
         this.controller = controller;
     }
+
 
     public void setResultTryToReg(String command) {
         if (command.equals(Command.REG_OK)) {
@@ -38,7 +47,20 @@ public class RegController {
             return;
         }
 
-        controller.registration(login, password);
+        if (createDirectory(login) == true) {
+            controller.registration(login, password);
+        }
+    }
+
+    public boolean createDirectory(String username) {
+        try {
+            String dirPath = this.path + "\\" + username;
+            Files.createDirectories(Paths.get(dirPath));
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
 

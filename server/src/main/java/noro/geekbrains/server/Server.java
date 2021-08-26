@@ -1,11 +1,12 @@
 package noro.geekbrains.server;
 
+import main.Command;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -85,12 +86,12 @@ public class Server {
 
     public void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
-        broadcastClientlist();
+       // broadcastClientlist();
     }
 
     public void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
-        broadcastClientlist();
+        //broadcastClientlist();
     }
 
     public AuthService getAuthService() {

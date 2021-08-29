@@ -9,9 +9,10 @@
       fx:controller="noro.geekbrains.client.Controller">
     <stylesheets>
         <URL value="@/css/style.css"/>
+        <?scenebuilder-stylesheet style.css?>
     </stylesheets>
 
-    <HBox fx:id="authPanel">
+    <HBox fx:id="authPanel" stylesheets="@css/style.css">
         <TextField fx:id="loginField" prefHeight="39.0" prefWidth="219.0" promptText="login" HBox.hgrow="ALWAYS"/>
         <PasswordField fx:id="passwordField" onAction="#tryToAuth" promptText="password" HBox.hgrow="ALWAYS"/>
         <Button minWidth="100" onAction="#tryToAuth" text="auth"/>
@@ -22,9 +23,10 @@
     <HBox prefHeight="335.0" prefWidth="738.0" VBox.vgrow="ALWAYS">
         <ListView fx:id="files" managed="false" minWidth="300" onMouseReleased="#clientListMouseReleased"
                   visible="false"/>
-        <TextArea fx:id="textArea" editable="false" prefHeight="338.0" prefWidth="560.0" HBox.hgrow="ALWAYS"/>
-        <Button layoutX="140.0" layoutY="140.0" minWidth="100.0" onAction="#saveFileToComputer" prefHeight="38.0"
-                prefWidth="124.0" text="Save" HBox.hgrow="ALWAYS">
+        <TextArea fx:id="textArea" editable="false" prefHeight="338.0" prefWidth="560.0"
+                  stylesheets="@css/style.css" HBox.hgrow="ALWAYS"/>
+        <Button fx:id="download" layoutX="140.0" layoutY="140.0" minWidth="100.0" onAction="#saveFileToComputer"
+                prefHeight="38.0" prefWidth="124.0" text="Download" visible="false" HBox.hgrow="ALWAYS">
             <HBox.margin>
                 <Insets top="100.0"/>
             </HBox.margin>
@@ -33,7 +35,9 @@
             </opaqueInsets>
         </Button>
 
-        <Button minWidth="100.0" onAction="#selectFile" text="Select File" HBox.hgrow="NEVER">
+        <Button fx:id="selectFileButton" minWidth="100.0" onAction="#selectFile" text="Select File" visible="false"
+                HBox.hgrow="NEVER">
+
             <HBox.margin>
                 <Insets top="300.0"/>
             </HBox.margin>

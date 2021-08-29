@@ -9,26 +9,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ListView;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
+import javafx.stage.*;
 import main.Command;
 import main.DbFiles;
 import main.Mapper;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 public class Controller implements Initializable {
@@ -40,7 +34,13 @@ public class Controller implements Initializable {
     @FXML
     public HBox authPanel;
     @FXML
-    ListView<String> files;
+    ListView<DbFiles> files;
+    @FXML
+    public Button download;
+    @FXML
+    public Button selectFileButton;
+    @FXML
+    public TextArea textArea;
 
     public List<Client> clients = new ArrayList<>();
     private Socket socket;
@@ -56,13 +56,18 @@ public class Controller implements Initializable {
     private String login;
     private RegController regController;
 
+
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
         authPanel.setVisible(!authenticated);
         authPanel.setManaged(!authenticated);
+
         files.setVisible(authenticated);
         files.setManaged(authenticated);
-
+        download.autosize();
+        download.setVisible(authenticated);
+        selectFileButton.setVisible(authenticated);
+        textArea.setVisible(authenticated);
         if (!authenticated) {
             username = "";
         }
@@ -132,7 +137,7 @@ public class Controller implements Initializable {
                                 files.getItems().clear();
                                 System.out.println("files cleared");
                                 for (DbFiles dbFile : dbFiles) {
-                                    files.getItems().add(dbFile.Name.toString());
+                                    files.getItems().add(dbFile);
                                     System.out.println("added file " + dbFile.toString());
                                 }
                             });
@@ -233,10 +238,16 @@ public class Controller implements Initializable {
             //insertfile command + file , in server split
             if (file != null) {
                 String str = Mapper.objectToString(dbFiles);
+                System.out.println("send insert command ");
                 out.writeUTF(Command.INSERT_FILE + str);//TODO /insertfile
+                System.out.println("");
                 System.out.printf("User selected file: %s \n", file.getAbsolutePath());
-                byte[] fileContent = new ObjectMapper().writeValueAsBytes(file);// file to byte array , was just file before this
+                byte[] fileContent = Files.readAllBytes(file.toPath());
+                System.out.println("before write");
+                System.out.println("file content size = " + fileContent.length);
+                out.writeLong(fileContent.length);
                 out.write(fileContent);
+                System.out.println("after write");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -250,5 +261,46 @@ public class Controller implements Initializable {
     }
 
     public void saveFileToComputer(ActionEvent actionEvent) {
+        System.out.println("/downloadfile button");
+        DbFiles selectedItem = files.getSelectionModel().getSelectedItem();
+        System.out.printf("selected file: id = %d name = %s", selectedItem.Id, selectedItem.Name);
+        try {
+
+            DirectoryChooser directoryChooser = new DirectoryChooser();
+            File file = directoryChooser.showDialog(this.stage);
+            String path = file.getAbsolutePath();
+            if (selectedItem != null) {
+                out.writeUTF(Command.DOWNLOAD_FILE + selectedItem.Id);
+                System.out.println("user selected: " + selectedItem + "  command -" + Command.DOWNLOAD_FILE);
+                Long size = in.readLong();
+                byte[] content = new byte[size.intValue()];
+                in.readFully(content);
+                if (downloadFile(file.getAbsolutePath(), content)) {
+                    System.out.println(Command.DOWNLOAD_FILE_OK);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean downloadFile(String pathToSave, byte[] content) {
+        if (content.length == 0) {
+            return false;
+        }
+        try {
+            OutputStream out = new FileOutputStream(new File(pathToSave));
+            out.write(content);
+            out.close();
+            return true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

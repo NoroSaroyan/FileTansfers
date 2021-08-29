@@ -13,4 +13,8 @@ public class Command {
     public static final String INSERT_FILE = "/insertfile";
     public static final String INSERT_FAILED = "/insertfailed";
     public static final String PATH_DOES_NOT_EXIST = "/pathdoesnotexist";
+    public static final String DOWNLOAD_FILE = "/downloadfile";
+    public static final String DOWNLOAD_FILE_DENIED = "/downloadfiledenied";
+    public static final String DOWNLOAD_FILE_OK = "/downloadfileok";
+    public static final String DOWNLOAD_FILE_NOT_OK ="/downloadfilenotok";
 }

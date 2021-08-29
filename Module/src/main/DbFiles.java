@@ -24,11 +24,12 @@ public class DbFiles implements Serializable {
 
     @Override
     public String toString() {
-        return "DbFiles{" +
-                "Id=" + Id +
-                ", Name='" + Name + '\'' +
-                ", Username='" + Username + '\'' +
-                ", Path='" + Path + '\'' +
-                '}';
+//        return "DbFiles{" +
+//                "Id=" + Id +
+//                ", Name='" + Name + '\'' +
+//                ", Username='" + Username + '\'' +
+//                ", Path='" + Path + '\'' +
+//                '}';
+        return this.Name;
     }
 }

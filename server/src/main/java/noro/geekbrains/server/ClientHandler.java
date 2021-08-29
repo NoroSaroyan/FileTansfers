@@ -8,6 +8,7 @@ import sun.misc.IOUtils;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.*;
+import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.List;
 
@@ -101,15 +102,28 @@ public class ClientHandler {
                                 out.writeUTF(Command.END);
                                 break;
                             }
+                            if (str.startsWith(Command.DOWNLOAD_FILE)) {
+                                // Path='D:\FileTransfers\Users\kkkl\tyty.txt'
+                                String[] data = str.split(Command.DOWNLOAD_FILE, 2);
+                                int i = Integer.parseInt(data[1]);
+                                DbFiles dbFile = SQLHandler.getFilesById(i);
+                                byte[] fileContent = Files.readAllBytes(Paths.get(dbFile.Path));
+                                out.writeLong(fileContent.length);
+                                out.write(fileContent);
+                            } else {
+                                server.broadcastMsg(this, str);
+                            }
+
                             if (str.startsWith(Command.INSERT_FILE)) {
-                                //TODO how to read all Bytes of InputStream
                                 String[] data = str.split(Command.INSERT_FILE, 2);
                                 DbFiles file = Mapper.stringToObject(data[1]);
                                 if (file != null) {
-                                    byte[] bytes = IOUtils.readAllBytes(in);
+                                    Long size = in.readLong();
+                                    byte[] bytes = new byte[size.intValue()];
+                                    in.readFully(bytes);
                                     String path = "D:\\FileTransfers\\Users\\" + this.login + "\\" + file.Name;
-                                    if (saveContentToFile(bytes, file.Path)) {
-                                        SQLHandler.insertFile(file.Name, file.Username, file.Path);
+                                    if (saveContentToFile(bytes, path)) {
+                                        SQLHandler.insertFile(file.Name, file.Username, path);
                                         sendMsg(Command.INSERT_OK);
                                     } else {
                                         out.writeUTF(str + ":" + Command.INSERT_FAILED);
@@ -117,10 +131,8 @@ public class ClientHandler {
                                 } else {
                                     server.broadcastMsg(this, str);
                                 }
-
                             }
                         }
-
                     }
                 } catch (RuntimeException e) {
                     System.out.println(e.getMessage());
@@ -156,7 +168,9 @@ public class ClientHandler {
         return login;
     }
 
-    //Saves users file to hard drive
+
+
+    //Saves users file to servers hard drive
     public static boolean saveContentToFile(byte[] arr, String path) throws Exception {
         if (!exist(path)) {
             if (!createDirectory(path)) {
@@ -171,7 +185,6 @@ public class ClientHandler {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return false;
     }
 

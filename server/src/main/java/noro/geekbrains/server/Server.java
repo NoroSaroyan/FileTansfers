@@ -41,9 +41,11 @@ public class Server {
 
             while (true) {
                 socket = server.accept();
+                socket.setSoTimeout(100*1000);
                 System.out.println("Client connected");
                 System.out.println("client: " + socket.getRemoteSocketAddress());
                 new ClientHandler(this, socket);
+
             }
 
         } catch (IOException e) {

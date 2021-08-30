@@ -270,10 +270,15 @@ public class Controller implements Initializable {
                 onlyDataOut.writeLong(fileContent.length);
                 onlyDataOut.write(fileContent);
                 System.out.println("after write");
+                askNewFiles();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void askNewFiles() throws IOException {
+        this.out.writeUTF(Command.ASK_ALL_FILES);
     }
 
     //checked
@@ -282,15 +287,11 @@ public class Controller implements Initializable {
         final int index = files.getSelectionModel().getSelectedIndex();
         try {
             out.writeUTF(Command.DELETE_FILE + file.Id);
-
-//            String response = in.readUTF();
-//            if (response.startsWith(Command.DELETE_FILE_OK)) {
-//                files.getItems().remove(index);
-//            }
-//            System.out.println(response);
+            askNewFiles();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     public void clientListMouseReleased(MouseEvent mouseEvent) throws IOException {
@@ -323,7 +324,7 @@ public class Controller implements Initializable {
 
                 System.out.println("    trying to save file.");
                 String absolutePath = Paths.get(path, selectedItem.Name).toFile().getAbsolutePath();
-                if (saveToFile(absolutePath , content)) {
+                if (saveToFile(absolutePath, content)) {
                     System.out.println(Command.DOWNLOAD_FILE_OK);
                 }
             }

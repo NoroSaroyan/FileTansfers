@@ -113,6 +113,10 @@ public class ClientHandler {
                                     out.writeUTF(Command.END);
                                     break;
                                 }
+                                if (str.startsWith(Command.ASK_ALL_FILES)) {
+                                    List<DbFiles> userFiles = SQLHandler.getUserFiles(login);
+                                    sendMsg(Command.DBFILES_OK + Mapper.objectToString(userFiles));
+                                }
                                 if (str.startsWith(Command.DOWNLOAD_FILE)) {
                                     String[] data = str.split(Command.DOWNLOAD_FILE, 2);
                                     System.out.println("download file " + data[1]);

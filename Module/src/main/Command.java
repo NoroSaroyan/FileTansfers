@@ -16,5 +16,9 @@ public class Command {
     public static final String DOWNLOAD_FILE = "/downloadfile";
     public static final String DOWNLOAD_FILE_DENIED = "/downloadfiledenied";
     public static final String DOWNLOAD_FILE_OK = "/downloadfileok";
-    public static final String DOWNLOAD_FILE_NOT_OK ="/downloadfilenotok";
+    public static final String DOWNLOAD_FILE_NOT_OK = "/downloadfilenotok";
+    public static final String DELETE_FILE_OK = "/deletefileok";
+    public static final String DELETE_FILE_NOT_OK = "/deletefilenotok";
+    public static final String DELETE_FILE = "/deletefile";
+    public static final String ASK_ALL_FILES = "/askallfiles";
 }

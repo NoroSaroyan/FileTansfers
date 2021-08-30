@@ -15,7 +15,7 @@ public class SQLHandler {
     private static PreparedStatement psInsertFile;
     private static PreparedStatement psGetUserFiles;
     private static PreparedStatement psGetFileById;
-
+    private static PreparedStatement psDeleteFile;
 
     public static boolean connect() {
         try {
@@ -37,6 +37,7 @@ public class SQLHandler {
         psInsertFile = connection.prepareStatement("Insert INTO files(name , username , path) VALUES (?,?,?);");
         psGetUserFiles = connection.prepareStatement("select * from files where username = ?;");
         psGetFileById = connection.prepareStatement("Select * from files where id = ?;");
+        psDeleteFile = connection.prepareStatement("delete from files where id = ?;");
     }
 
     public static List<DbFiles> getUserFiles(String username) {
@@ -125,14 +126,24 @@ public class SQLHandler {
 
     public static boolean changePassword(String username, String oldPassword, String newPassword) {
         try {
-            //psChangePassword = connection.prepareStatement
-            //("Update clients SET password = ? WHERE username = ? AND password = ?;");
+
             psChangePassword.setString(1, newPassword);
             psChangeUserName.setString(2, username);
             psChangePassword.setString(3, oldPassword);
             psChangeUserName.executeUpdate();
             return true;
         } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public static boolean deleteFile(int id) {
+        try {
+            psDeleteFile.setInt(1, id);
+            psDeleteFile.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
             return false;
         }
     }

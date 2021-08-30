@@ -1,6 +1,5 @@
 package noro.geekbrains.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 
 import javafx.event.ActionEvent;
@@ -23,7 +22,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Controller implements Initializable {
 
@@ -40,13 +41,19 @@ public class Controller implements Initializable {
     @FXML
     public Button selectFileButton;
     @FXML
+    public Button delete;
+    @FXML
     public TextArea textArea;
 
     public List<Client> clients = new ArrayList<>();
     private Socket socket;
+    private Socket onlyDataSocket;
     private DataInputStream in;
+    private DataInputStream onlyDataIn;
     private DataOutputStream out;
+    private DataOutputStream onlyDataOut;
     private final int PORT = 8189;
+    private final int onlyDataPort = 8188;
     private final String IP_ADDRESS = "localhost";
 
     private boolean authenticated;
@@ -55,7 +62,6 @@ public class Controller implements Initializable {
     private Stage regStage;
     private String login;
     private RegController regController;
-
 
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
@@ -66,8 +72,9 @@ public class Controller implements Initializable {
         files.setManaged(authenticated);
         download.autosize();
         download.setVisible(authenticated);
+        delete.setVisible(authenticated);
         selectFileButton.setVisible(authenticated);
-        textArea.setVisible(authenticated);
+        //textArea.setVisible(authenticated);
         if (!authenticated) {
             username = "";
         }
@@ -96,8 +103,16 @@ public class Controller implements Initializable {
     private void connect() {
         try {
             socket = new Socket(IP_ADDRESS, PORT);
+            onlyDataSocket = new Socket(IP_ADDRESS, onlyDataPort);
+
+            socket.setSoTimeout(60_000);
+
             in = new DataInputStream(socket.getInputStream());
+            onlyDataIn = new DataInputStream(onlyDataSocket.getInputStream());
+
             out = new DataOutputStream(socket.getOutputStream());
+            onlyDataOut = new DataOutputStream(onlyDataSocket.getOutputStream());
+
             new Thread(() -> {
                 try {
                     // цикл аутентификации
@@ -123,27 +138,31 @@ public class Controller implements Initializable {
                     }
                     //цикл работы
                     while (true) {
-                        String str = in.readUTF();
-                        System.out.println("<<-" + str);
-                        if (str.startsWith(Command.INSERT_OK)) {
+                        //TODO lock and unlock readUTF
+                        try {
+                            String str = in.readUTF();
+                            System.out.println("<<-" + str);
+                            if (str.startsWith(Command.INSERT_OK)) {
 
-                        }
-                        if (str.startsWith(Command.DBFILES_OK)) {
-                            // /dbfilesok
-                            // DbFile[{id} = * , name = "dd"]
-                            String[] data = str.split(Command.DBFILES_OK, 2);
-                            List<DbFiles> dbFiles = Mapper.stringToList(data[1]);
-                            Platform.runLater(() -> {
-                                files.getItems().clear();
-                                System.out.println("files cleared");
-                                for (DbFiles dbFile : dbFiles) {
-                                    files.getItems().add(dbFile);
-                                    System.out.println("added file " + dbFile.toString());
-                                }
-                            });
+                            }
+                            if (str.startsWith(Command.DBFILES_OK)) {
+                                // /dbfilesok
+                                // DbFile[{id} = * , name = "dd"]
+                                String[] data = str.split(Command.DBFILES_OK, 2);
+                                List<DbFiles> dbFiles = Mapper.stringToList(data[1]);
+                                Platform.runLater(() -> {
+                                    files.getItems().clear();
+                                    System.out.println("files cleared");
+                                    for (DbFiles dbFile : dbFiles) {
+                                        files.getItems().add(dbFile);
+                                        System.out.println("added file " + dbFile.toString());
+                                    }
+                                });
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
-
                 } catch (RuntimeException e) {
                     System.out.println(e.getMessage());
                 } catch (IOException e) {
@@ -229,6 +248,7 @@ public class Controller implements Initializable {
         }
     }
 
+    //checked
     public void selectFile(ActionEvent actionEvent) {
         System.out.println("/selectFile button");
         try {
@@ -239,16 +259,35 @@ public class Controller implements Initializable {
             if (file != null) {
                 String str = Mapper.objectToString(dbFiles);
                 System.out.println("send insert command ");
-                out.writeUTF(Command.INSERT_FILE + str);//TODO /insertfile
+                out.writeUTF(Command.INSERT_FILE + str);
                 System.out.println("");
                 System.out.printf("User selected file: %s \n", file.getAbsolutePath());
+
                 byte[] fileContent = Files.readAllBytes(file.toPath());
+
                 System.out.println("before write");
                 System.out.println("file content size = " + fileContent.length);
-                out.writeLong(fileContent.length);
-                out.write(fileContent);
+                onlyDataOut.writeLong(fileContent.length);
+                onlyDataOut.write(fileContent);
                 System.out.println("after write");
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //checked
+    public void deleteFile(ActionEvent actionEvent) {
+        DbFiles file = files.getSelectionModel().getSelectedItem();
+        final int index = files.getSelectionModel().getSelectedIndex();
+        try {
+            out.writeUTF(Command.DELETE_FILE + file.Id);
+
+//            String response = in.readUTF();
+//            if (response.startsWith(Command.DELETE_FILE_OK)) {
+//                files.getItems().remove(index);
+//            }
+//            System.out.println(response);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -260,35 +299,46 @@ public class Controller implements Initializable {
 
     }
 
+    //checked
     public void saveFileToComputer(ActionEvent actionEvent) {
         System.out.println("/downloadfile button");
         DbFiles selectedItem = files.getSelectionModel().getSelectedItem();
-        System.out.printf("selected file: id = %d name = %s", selectedItem.Id, selectedItem.Name);
+        System.out.printf("    selected file: id = %d name = %s \n", selectedItem.Id, selectedItem.Name);
         try {
-
             DirectoryChooser directoryChooser = new DirectoryChooser();
             File file = directoryChooser.showDialog(this.stage);
             String path = file.getAbsolutePath();
             if (selectedItem != null) {
-                out.writeUTF(Command.DOWNLOAD_FILE + selectedItem.Id);
-                System.out.println("user selected: " + selectedItem + "  command -" + Command.DOWNLOAD_FILE);
-                Long size = in.readLong();
+                out.writeUTF(Command.DOWNLOAD_FILE + selectedItem.Id.toString());
+
+                System.out.println("    user selected: " + selectedItem + "  command -" + Command.DOWNLOAD_FILE);
+
+                Long size = onlyDataIn.readLong();
+                System.out.println("    read size " + size);
+
                 byte[] content = new byte[size.intValue()];
-                in.readFully(content);
-                if (downloadFile(file.getAbsolutePath(), content)) {
+
+                System.out.println("    read content ");
+                onlyDataIn.readFully(content);
+
+                System.out.println("    trying to save file.");
+                String absolutePath = Paths.get(path, selectedItem.Name).toFile().getAbsolutePath();
+                if (saveToFile(absolutePath , content)) {
                     System.out.println(Command.DOWNLOAD_FILE_OK);
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static boolean downloadFile(String pathToSave, byte[] content) {
-        if (content.length == 0) {
-            return false;
+    public static boolean saveToFile(String pathToSave, byte[] content) {
+        if (!exist(pathToSave)) {
+            if (!createDirectory(pathToSave)) {
+                return false;
+            }
         }
+
         try {
             OutputStream out = new FileOutputStream(new File(pathToSave));
             out.write(content);
@@ -300,6 +350,26 @@ public class Controller implements Initializable {
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean exist(String path) {
+        return new File(path).exists();
+        //return (path).toFile().exists();
+    }
+
+    public static boolean createDirectory(String p) {
+        if (!exist(p)) {
+            try {
+                Path path = Paths.get(p).getParent();
+                Files.createDirectories(path);
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            return false;
         }
         return false;
     }

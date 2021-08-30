@@ -14,9 +14,17 @@ import java.util.concurrent.Executors;
 
 public class Server {
     private final int PORT = 8189;
+    private final int ONLYDATAPORT = 8188;
+
     private ServerSocket server;
+    private ServerSocket onlyDataServer;
+    private Socket onlyDataSocket;
     private Socket socket;
+
+    private DataInputStream onlyDataIn;
     private DataInputStream in;
+
+    private DataOutputStream onlyDataOut;
     private DataOutputStream out;
 
     private List<ClientHandler> clients;
@@ -37,15 +45,17 @@ public class Server {
 
         try {
             server = new ServerSocket(PORT);
+            onlyDataServer = new ServerSocket(ONLYDATAPORT);
             System.out.println("Server started");
 
             while (true) {
                 socket = server.accept();
-                socket.setSoTimeout(100*1000);
+                onlyDataSocket = onlyDataServer.accept();
+                socket.setSoTimeout(100_000);
+                onlyDataSocket.setSoTimeout(100_000);
                 System.out.println("Client connected");
                 System.out.println("client: " + socket.getRemoteSocketAddress());
-                new ClientHandler(this, socket);
-
+                new ClientHandler(this, socket, onlyDataSocket);
             }
 
         } catch (IOException e) {
@@ -88,7 +98,7 @@ public class Server {
 
     public void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
-       // broadcastClientlist();
+        // broadcastClientlist();
     }
 
     public void unsubscribe(ClientHandler clientHandler) {

@@ -23,8 +23,6 @@
     <HBox prefHeight="335.0" prefWidth="738.0" VBox.vgrow="ALWAYS">
         <ListView fx:id="files" managed="false" minWidth="300" onMouseReleased="#clientListMouseReleased"
                   visible="false"/>
-        <TextArea fx:id="textArea" editable="false" prefHeight="338.0" prefWidth="560.0"
-                  stylesheets="@css/style.css" HBox.hgrow="ALWAYS"/>
         <Button fx:id="download" layoutX="140.0" layoutY="140.0" minWidth="100.0" onAction="#saveFileToComputer"
                 prefHeight="38.0" prefWidth="124.0" text="Download" visible="false" HBox.hgrow="ALWAYS">
             <HBox.margin>
@@ -34,8 +32,9 @@
                 <Insets/>
             </opaqueInsets>
         </Button>
-
-        <Button fx:id="selectFileButton" minWidth="100.0" onAction="#selectFile" text="Select File" visible="false"
+        <Button fx:id="delete" layoutX="240.0" layoutY="124.0" minWidth="100.0" minHeight="38.0" onAction="#deleteFile"
+                prefHeight="38.0" prefWidth="124.0" text="Delete" visible="false" HBox.hgrow="ALWAYS"/>
+        <Button fx:id="selectFileButton" minWidth="100.0" onAction="#selectFile" text="Add File" visible="false"
                 HBox.hgrow="NEVER">
 
             <HBox.margin>
@@ -46,6 +45,4 @@
             </opaqueInsets>
         </Button>
     </HBox>
-
-
 </VBox>

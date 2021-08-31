@@ -1,7 +1,6 @@
 package noro.geekbrains.client;
 
 import javafx.application.Platform;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,9 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.stage.*;
-import main.Command;
-import main.DbFiles;
-import main.Mapper;
+import noro.geekbrains.*;
 
 import java.io.*;
 import java.net.ConnectException;
@@ -23,7 +20,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
 

@@ -1,4 +1,4 @@
-package main;
+package noro.geekbrains;
 
 import java.io.Serializable;
 
@@ -24,7 +24,7 @@ public class DbFiles implements Serializable {
 
     @Override
     public String toString() {
-//        return "DbFiles{" +
+//        return "noro.geekbrains.DbFiles{" +
 //                "Id=" + Id +
 //                ", Name='" + Name + '\'' +
 //                ", Username='" + Username + '\'' +

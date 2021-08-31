@@ -1,6 +1,6 @@
 package noro.geekbrains.server;
 
-import main.DbFiles;
+import noro.geekbrains.DbFiles;
 
 import java.sql.*;
 import java.util.ArrayList;

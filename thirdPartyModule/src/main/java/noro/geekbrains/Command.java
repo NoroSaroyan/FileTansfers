@@ -1,4 +1,4 @@
-package main;
+package noro.geekbrains;
 
 public class Command {
     public static final String END = "/end";

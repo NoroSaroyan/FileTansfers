@@ -1,4 +1,4 @@
-package main;
+package noro.geekbrains;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;

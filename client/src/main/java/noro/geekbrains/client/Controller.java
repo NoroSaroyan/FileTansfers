@@ -24,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.locks.ReentrantLock;
 
 public class Controller implements Initializable {
 
@@ -70,7 +69,12 @@ public class Controller implements Initializable {
 
         files.setVisible(authenticated);
         files.setManaged(authenticated);
-        download.autosize();
+        download.setLayoutY(475);
+        download.setLayoutX(490);
+        delete.setLayoutY(475);
+        delete.setLayoutX(600);
+        selectFileButton.setLayoutY(375);
+        selectFileButton.setLayoutX(490);
         download.setVisible(authenticated);
         delete.setVisible(authenticated);
         selectFileButton.setVisible(authenticated);
@@ -118,15 +122,11 @@ public class Controller implements Initializable {
                     // цикл аутентификации
                     while (true) {
                         String str = in.readUTF();
-
                         if (str.startsWith("/")) {
                             if (str.startsWith(Command.AUTH_OK)) {
-                                String[] token = str.split("\\s");
-                                username = token[1];
-                                setAuthenticated(true);
+                                handleAuthOk(str);
                                 break;
                             }
-
                             if (str.equals(Command.REG_OK)) {
                                 regController.setResultTryToReg(Command.REG_OK);
                             }
@@ -138,26 +138,14 @@ public class Controller implements Initializable {
                     }
                     //цикл работы
                     while (true) {
-                        //TODO lock and unlock readUTF
                         try {
                             String str = in.readUTF();
                             System.out.println("<<-" + str);
                             if (str.startsWith(Command.INSERT_OK)) {
-
+                                System.out.println(Command.INSERT_OK);
                             }
                             if (str.startsWith(Command.DBFILES_OK)) {
-                                // /dbfilesok
-                                // DbFile[{id} = * , name = "dd"]
-                                String[] data = str.split(Command.DBFILES_OK, 2);
-                                List<DbFiles> dbFiles = Mapper.stringToList(data[1]);
-                                Platform.runLater(() -> {
-                                    files.getItems().clear();
-                                    System.out.println("files cleared");
-                                    for (DbFiles dbFile : dbFiles) {
-                                        files.getItems().add(dbFile);
-                                        System.out.println("added file " + dbFile.toString());
-                                    }
-                                });
+                                handleDbFilesOk(str);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -176,8 +164,6 @@ public class Controller implements Initializable {
                     }
                 }
             }).start();
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -195,7 +181,7 @@ public class Controller implements Initializable {
         } catch (NullPointerException | ConnectException e) {
             System.out.println("error");
         } catch (IOException e) {
-            //e.printStackTrace();
+            e.printStackTrace();
         } finally {
             passwordField.clear();
         }
@@ -248,28 +234,20 @@ public class Controller implements Initializable {
         }
     }
 
-    //checked
     public void selectFile(ActionEvent actionEvent) {
-        System.out.println("/selectFile button");
         try {
             FileChooser fileChooser = new FileChooser();
             File file = fileChooser.showOpenDialog(this.stage);
             DbFiles dbFiles = new DbFiles(12342, file.getName(), this.username, file.getAbsolutePath());
-            //insertfile command + file , in server split
             if (file != null) {
                 String str = Mapper.objectToString(dbFiles);
-                System.out.println("send insert command ");
                 out.writeUTF(Command.INSERT_FILE + str);
-                System.out.println("");
-                System.out.printf("User selected file: %s \n", file.getAbsolutePath());
 
                 byte[] fileContent = Files.readAllBytes(file.toPath());
 
-                System.out.println("before write");
                 System.out.println("file content size = " + fileContent.length);
                 onlyDataOut.writeLong(fileContent.length);
                 onlyDataOut.write(fileContent);
-                System.out.println("after write");
                 askNewFiles();
             }
         } catch (Exception e) {
@@ -279,6 +257,24 @@ public class Controller implements Initializable {
 
     public void askNewFiles() throws IOException {
         this.out.writeUTF(Command.ASK_ALL_FILES);
+    }
+
+    public void handleAuthOk(String str) {
+        String[] token = str.split("\\s");
+        username = token[1];
+        setAuthenticated(true);
+    }
+
+    public void handleDbFilesOk(String str) {
+        String[] data = str.split(Command.DBFILES_OK, 2);
+        List<DbFiles> dbFiles = Mapper.stringToList(data[1]);
+        Platform.runLater(() -> {
+            files.getItems().clear();
+            System.out.println("files cleared");
+            for (DbFiles dbFile : dbFiles) {
+                files.getItems().add(dbFile);
+            }
+        });
     }
 
     //checked
@@ -300,11 +296,8 @@ public class Controller implements Initializable {
 
     }
 
-    //checked
     public void saveFileToComputer(ActionEvent actionEvent) {
-        System.out.println("/downloadfile button");
         DbFiles selectedItem = files.getSelectionModel().getSelectedItem();
-        System.out.printf("    selected file: id = %d name = %s \n", selectedItem.Id, selectedItem.Name);
         try {
             DirectoryChooser directoryChooser = new DirectoryChooser();
             File file = directoryChooser.showDialog(this.stage);
@@ -312,17 +305,12 @@ public class Controller implements Initializable {
             if (selectedItem != null) {
                 out.writeUTF(Command.DOWNLOAD_FILE + selectedItem.Id.toString());
 
-                System.out.println("    user selected: " + selectedItem + "  command -" + Command.DOWNLOAD_FILE);
-
                 Long size = onlyDataIn.readLong();
-                System.out.println("    read size " + size);
 
                 byte[] content = new byte[size.intValue()];
 
-                System.out.println("    read content ");
                 onlyDataIn.readFully(content);
 
-                System.out.println("    trying to save file.");
                 String absolutePath = Paths.get(path, selectedItem.Name).toFile().getAbsolutePath();
                 if (saveToFile(absolutePath, content)) {
                     System.out.println(Command.DOWNLOAD_FILE_OK);
@@ -357,7 +345,6 @@ public class Controller implements Initializable {
 
     public static boolean exist(String path) {
         return new File(path).exists();
-        //return (path).toFile().exists();
     }
 
     public static boolean createDirectory(String p) {

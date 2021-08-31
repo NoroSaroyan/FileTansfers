@@ -15,16 +15,17 @@
     <HBox fx:id="authPanel" stylesheets="@css/style.css">
         <TextField fx:id="loginField" prefHeight="39.0" prefWidth="219.0" promptText="login" HBox.hgrow="ALWAYS"/>
         <PasswordField fx:id="passwordField" onAction="#tryToAuth" promptText="password" HBox.hgrow="ALWAYS"/>
-        <Button minWidth="100" onAction="#tryToAuth" text="auth"/>
-        <Button minWidth="100" onAction="#showRegWindow" text="reg"/>
+        <Button minWidth="100" onAction="#tryToAuth" text="Sign In"/>
+        <Button minWidth="100" onAction="#showRegWindow" text="Sign Up"/>
     </HBox>
     <HBox fx:id="selectFile"/>
 
     <HBox prefHeight="335.0" prefWidth="738.0" VBox.vgrow="ALWAYS">
         <ListView fx:id="files" managed="false" minWidth="300" onMouseReleased="#clientListMouseReleased"
                   visible="false"/>
-        <Button fx:id="download" layoutX="140.0" layoutY="140.0" minWidth="100.0" onAction="#saveFileToComputer"
-                prefHeight="38.0" prefWidth="124.0" text="Download" visible="false" HBox.hgrow="ALWAYS">
+        <!--                layoutX="140.0" layoutY="140.0"-->
+        <Button fx:id="download" minWidth="100.0" onAction="#saveFileToComputer"
+                text="Download" visible="false" HBox.hgrow="NEVER">
             <HBox.margin>
                 <Insets top="100.0"/>
             </HBox.margin>
@@ -32,10 +33,10 @@
                 <Insets/>
             </opaqueInsets>
         </Button>
-        <Button fx:id="delete" layoutX="240.0" layoutY="124.0" minWidth="100.0" minHeight="38.0" onAction="#deleteFile"
-                prefHeight="38.0" prefWidth="124.0" text="Delete" visible="false" HBox.hgrow="ALWAYS"/>
-        <Button fx:id="selectFileButton" minWidth="100.0" onAction="#selectFile" text="Add File" visible="false"
-                HBox.hgrow="NEVER">
+        <Button fx:id="delete" minWidth="100.0" onAction="#deleteFile"
+                 text="Delete" visible="false" HBox.hgrow="NEVER"/>
+        <Button fx:id="selectFileButton" minWidth="100.0" onAction="#selectFile"
+                text="Add File" visible="false" HBox.hgrow="NEVER">
 
             <HBox.margin>
                 <Insets top="300.0"/>

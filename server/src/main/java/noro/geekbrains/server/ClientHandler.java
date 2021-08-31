@@ -42,17 +42,12 @@ public class ClientHandler {
 
             server.getExecutorService().execute(() -> {
                 try {
-
                     // цикл аутентификации
                     while (true) {
                         String str = in.readUTF();
-
                         if (str.equals(Command.END)) {
-                            out.writeUTF(Command.END);
-                            System.out.println("");
-                            throw new RuntimeException("Клиент захотел отключиться");
+                           handleCommandEnd(str);
                         }
-
                         //если команда аутентификация
                         if (str.startsWith(Command.AUTH)) {
                             String[] token = str.split("\\s", 3);
@@ -65,15 +60,9 @@ public class ClientHandler {
                             if (login != null && password != null) {
                                 if (server.getAuthService().login(login, password))
                                     if (!server.isLoginAuthenticated(login)) {
-                                        sendMsg(Command.AUTH_OK + " " + login);
-                                        server.subscribe(this);
-                                        List<DbFiles> userFiles = SQLHandler.getUserFiles(login);
-                                        sendMsg(Command.DBFILES_OK + Mapper.objectToString(userFiles));
-                                        System.out.println("client: " + socket.getRemoteSocketAddress() +
-                                                " connected with login: " + login);
+                                        handleAuthOk(str);
                                         break;
                                     } else {
-                                        System.out.println("already using");
                                         sendMsg("Already in use");
                                     }
                                 else {
@@ -96,7 +85,6 @@ public class ClientHandler {
                                     .registration(token[1], token[2]);
                             if (regSuccess) {
                                 sendMsg(Command.REG_OK);
-                                System.out.println("Reg ok");
                                 System.out.println(Arrays.toString(token));
                             } else {
                                 sendMsg(Command.REG_NO);
@@ -114,67 +102,18 @@ public class ClientHandler {
                                     break;
                                 }
                                 if (str.startsWith(Command.ASK_ALL_FILES)) {
-                                    List<DbFiles> userFiles = SQLHandler.getUserFiles(login);
-                                    sendMsg(Command.DBFILES_OK + Mapper.objectToString(userFiles));
+                                    handleAskAllFile();
                                 }
                                 if (str.startsWith(Command.DOWNLOAD_FILE)) {
-                                    String[] data = str.split(Command.DOWNLOAD_FILE, 2);
-                                    System.out.println("download file " + data[1]);
-                                    int i = Integer.parseInt(data[1]);
-                                    DbFiles dbFile = SQLHandler.getFilesById(i);
-                                    System.out.println("    got file from db " + dbFile.toString());
-                                    byte[] fileContent = Files.readAllBytes(Paths.get(dbFile.Path));
-                                    System.out.println("    write file content length" + fileContent.length);
-                                    onlyDataOut.writeLong(fileContent.length);
-                                    System.out.println("    write file content");
-                                    onlyDataOut.write(fileContent);
+                                    handleDownloadFile(str);
                                 } else {
-                                    System.out.println("download file else broadcast msg");
                                     server.broadcastMsg(this, str);
                                 }
                                 if (str.startsWith(Command.DELETE_FILE)) {
-                                    String[] data = str.split(Command.DELETE_FILE, 2);
-                                    String fileId = data[1];
-                                    System.out.println("deleted file id =" + fileId);
-                                    DbFiles dbFile = SQLHandler.getFilesById(Integer.parseInt(fileId));
-                                    System.out.println("got file from db " + dbFile.toString());
-                                    //TODO check dbFile null
-                                    if (dbFile != null) {
-                                        File file = new File(dbFile.Path);
-                                        boolean isDeleted = false;
-
-                                        try {
-                                            isDeleted = Files.deleteIfExists(file.toPath());
-                                        } catch (IOException ioException) {
-                                            ioException.printStackTrace();
-                                        }
-
-                                        if (isDeleted) {
-                                            SQLHandler.deleteFile(Integer.parseInt(fileId));
-                                            out.writeUTF(Command.DELETE_FILE_OK + fileId);
-                                        } else {
-                                            out.writeUTF(Command.DELETE_FILE_NOT_OK + "id:" + fileId);
-                                        }
-                                    }
+                                    handleDeleteFile(str);
                                 }
                                 if (str.startsWith(Command.INSERT_FILE)) {
-                                    String[] data = str.split(Command.INSERT_FILE, 2);
-                                    DbFiles file = Mapper.stringToObject(data[1]);
-                                    if (file != null) {
-                                        Long size = onlyDataIn.readLong();
-                                        byte[] bytes = new byte[size.intValue()];
-                                        onlyDataIn.readFully(bytes);
-                                        String path = "D:\\FileTransfers\\Users\\" + this.login + "\\" + file.Name;
-                                        if (saveContentToFile(bytes, path)) {
-                                            SQLHandler.insertFile(file.Name, file.Username, path);
-                                            sendMsg(Command.INSERT_OK);
-                                        } else {
-                                            out.writeUTF(Command.INSERT_FAILED);
-
-                                        }
-                                    } else {
-                                        server.broadcastMsg(this, str);
-                                    }
+                                    handleInsertFile(str);
                                 }
                             }
                         } catch (Exception e) {
@@ -196,12 +135,76 @@ public class ClientHandler {
                     }
                 }
             });
-
         } catch (
                 IOException e) {
             e.printStackTrace();
         }
+    }
 
+    private void handleCommandEnd(String str) throws IOException {
+        out.writeUTF(Command.END);
+        System.out.println("");
+        throw new RuntimeException("Клиент захотел отключиться");
+    }
+
+    private void handleInsertFile(String str) throws Exception {
+        String[] data = str.split(Command.INSERT_FILE, 2);
+        DbFiles file = Mapper.stringToObject(data[1]);
+        if (file != null) {
+            Long size = onlyDataIn.readLong();
+            byte[] bytes = new byte[size.intValue()];
+            onlyDataIn.readFully(bytes);
+            String path = "D:\\FileTransfers\\Users\\" + this.login + "\\" + file.Name;
+            if (saveContentToFile(bytes, path)) {
+                SQLHandler.insertFile(file.Name, file.Username, path);
+                sendMsg(Command.INSERT_OK);
+            } else {
+                out.writeUTF(Command.INSERT_FAILED);
+
+            }
+        } else {
+            server.broadcastMsg(this, str);
+        }}
+
+    private void handleDeleteFile(String str) throws IOException {
+        String[] data = str.split(Command.DELETE_FILE, 2);
+        String fileId = data[1];
+        System.out.println("deleted file id =" + fileId);
+        DbFiles dbFile = SQLHandler.getFilesById(Integer.parseInt(fileId));
+        System.out.println("got file from db " + dbFile.toString());
+        if (dbFile != null) {
+            File file = new File(dbFile.Path);
+            boolean isDeleted = false;
+            try {
+                isDeleted = Files.deleteIfExists(file.toPath());
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+            }
+            if (isDeleted) {
+                SQLHandler.deleteFile(Integer.parseInt(fileId));
+                out.writeUTF(Command.DELETE_FILE_OK + fileId);
+            } else {
+                out.writeUTF(Command.DELETE_FILE_NOT_OK + "id:" + fileId);
+            }
+        }
+    }
+
+    private void handleDownloadFile(String str) throws IOException {
+        String[] data = str.split(Command.DOWNLOAD_FILE, 2);
+        System.out.println("download file " + data[1]);
+        int i = Integer.parseInt(data[1]);
+        DbFiles dbFile = SQLHandler.getFilesById(i);
+        System.out.println("    got file from db " + dbFile.toString());
+        byte[] fileContent = Files.readAllBytes(Paths.get(dbFile.Path));
+        System.out.println("    write file content length" + fileContent.length);
+        onlyDataOut.writeLong(fileContent.length);
+        System.out.println("    write file content");
+        onlyDataOut.write(fileContent);
+    }
+
+    private void handleAskAllFile() {
+        List<DbFiles> userFiles = SQLHandler.getUserFiles(login);
+        sendMsg(Command.DBFILES_OK + Mapper.objectToString(userFiles));
     }
 
     public void sendMsg(String msg) {
@@ -214,6 +217,15 @@ public class ClientHandler {
 
     public String getLogin() {
         return login;
+    }
+
+    public void handleAuthOk(String str) {
+        sendMsg(Command.AUTH_OK + " " + login);
+        server.subscribe(this);
+        List<DbFiles> userFiles = SQLHandler.getUserFiles(login);
+        sendMsg(Command.DBFILES_OK + Mapper.objectToString(userFiles));
+        System.out.println("client: " + socket.getRemoteSocketAddress() +
+                " connected with login: " + login);
     }
 
 
@@ -237,7 +249,6 @@ public class ClientHandler {
 
     public static boolean exist(String path) {
         return new File(path).exists();
-        //return (path).toFile().exists();
     }
 
     public static boolean createDirectory(String p) {

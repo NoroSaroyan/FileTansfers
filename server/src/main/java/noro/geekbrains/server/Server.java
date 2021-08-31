@@ -39,7 +39,7 @@ public class Server {
         clients = new CopyOnWriteArrayList<>();
         executorService = Executors.newCachedThreadPool();
         if (!SQLHandler.connect()) {
-            throw new RuntimeException("Не удалось подключиться к БД");
+            throw new RuntimeException("could not connect to database");
         }
         authService = new DatabaseAuthService();
 
@@ -47,6 +47,7 @@ public class Server {
             server = new ServerSocket(PORT);
             onlyDataServer = new ServerSocket(ONLYDATAPORT);
             System.out.println("Server started");
+            System.out.println("Data Server Started");
 
             while (true) {
                 socket = server.accept();
@@ -61,7 +62,6 @@ public class Server {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            //SQLHandler.disconnect();
             try {
                 socket.close();
             } catch (IOException e) {
@@ -98,12 +98,10 @@ public class Server {
 
     public void subscribe(ClientHandler clientHandler) {
         clients.add(clientHandler);
-        // broadcastClientlist();
     }
 
     public void unsubscribe(ClientHandler clientHandler) {
         clients.remove(clientHandler);
-        //broadcastClientlist();
     }
 
     public AuthService getAuthService() {
@@ -117,19 +115,5 @@ public class Server {
             }
         }
         return false;
-    }
-
-    public void broadcastClientlist() {
-        StringBuilder sb = new StringBuilder(Command.CLIENT_LIST);
-
-        for (ClientHandler c : clients) {
-            sb.append(" ").append(c.getLogin());
-        }
-
-        String msg = sb.toString();
-
-        for (ClientHandler c : clients) {
-            c.sendMsg(msg);
-        }
     }
 }

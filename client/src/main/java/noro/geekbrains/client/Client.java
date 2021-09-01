@@ -1,6 +1,5 @@
 package noro.geekbrains.client;
 
-import java.io.*;
 public class Client {
     public String Username;
     public String Password;

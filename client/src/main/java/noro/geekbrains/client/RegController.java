@@ -8,6 +8,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import noro.geekbrains.Command;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -46,14 +47,14 @@ public class RegController {
             return;
         }
 
-        if (createDirectory(login) == true) {
+        if (createDirectory(login)) {
             controller.registration(login, password);
         }
     }
 
     public boolean createDirectory(String username) {
         try {
-            String dirPath = this.path + "\\" + username;
+            String dirPath = this.path + File.pathSeparator + username;
             Files.createDirectories(Paths.get(dirPath));
             return true;
         } catch (IOException e) {

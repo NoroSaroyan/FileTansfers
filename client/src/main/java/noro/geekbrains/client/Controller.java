@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 import javafx.stage.*;
 import noro.geekbrains.*;
 
@@ -41,9 +42,8 @@ public class Controller implements Initializable {
     @FXML
     public Button delete;
     @FXML
-    public TextArea textArea;
+    public Text text;
 
-    public List<Client> clients = new ArrayList<>();
     private Socket socket;
     private Socket onlyDataSocket;
     private DataInputStream in;
@@ -66,18 +66,17 @@ public class Controller implements Initializable {
         authPanel.setVisible(!authenticated);
         authPanel.setManaged(!authenticated);
 
+        text.setVisible(authenticated);
+        text.setText("text is showing, commands set with setText() less than 1 sec ");
+
         files.setVisible(authenticated);
         files.setManaged(authenticated);
-        download.setLayoutY(475);
-        download.setLayoutX(490);
-        delete.setLayoutY(475);
-        delete.setLayoutX(600);
-        selectFileButton.setLayoutY(375);
-        selectFileButton.setLayoutX(490);
+
         download.setVisible(authenticated);
+
         delete.setVisible(authenticated);
         selectFileButton.setVisible(authenticated);
-        //textArea.setVisible(authenticated);
+
         if (!authenticated) {
             username = "";
         }
@@ -142,6 +141,7 @@ public class Controller implements Initializable {
                             System.out.println("<<-" + str);
                             if (str.startsWith(Command.INSERT_OK)) {
                                 System.out.println(Command.INSERT_OK);
+                                sendNotification(Command.INSERT_OK);
                             }
                             if (str.startsWith(Command.DBFILES_OK)) {
                                 handleDbFilesOk(str);
@@ -150,9 +150,7 @@ public class Controller implements Initializable {
                             e.printStackTrace();
                         }
                     }
-                } catch (RuntimeException e) {
-                    System.out.println(e.getMessage());
-                } catch (IOException e) {
+                } catch (RuntimeException | IOException e) {
                     e.printStackTrace();
                 } finally {
                     setAuthenticated(false);
@@ -237,8 +235,8 @@ public class Controller implements Initializable {
         try {
             FileChooser fileChooser = new FileChooser();
             File file = fileChooser.showOpenDialog(this.stage);
-            DbFiles dbFiles = new DbFiles(12342, file.getName(), this.username, file.getAbsolutePath());
             if (file != null) {
+                DbFiles dbFiles = new DbFiles(12342, file.getName(), this.username, file.getAbsolutePath());
                 String str = Mapper.objectToString(dbFiles);
                 out.writeUTF(Command.INSERT_FILE + str);
 
@@ -248,6 +246,7 @@ public class Controller implements Initializable {
                 onlyDataOut.writeLong(fileContent.length);
                 onlyDataOut.write(fileContent);
                 askNewFiles();
+                sendNotification(Command.INSERT_OK);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -274,25 +273,24 @@ public class Controller implements Initializable {
                 files.getItems().add(dbFile);
             }
         });
+        sendNotification(data[0]);
     }
 
-    //checked
+
     public void deleteFile(ActionEvent actionEvent) {
         DbFiles file = files.getSelectionModel().getSelectedItem();
-        final int index = files.getSelectionModel().getSelectedIndex();
         try {
             out.writeUTF(Command.DELETE_FILE + file.Id);
             askNewFiles();
+            sendNotification(Command.DELETE_FILE_OK);
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        sendNotification(Command.DELETE_FILE_NOT_OK);
     }
 
     public void clientListMouseReleased(MouseEvent mouseEvent) throws IOException {
         System.out.println(files.getSelectionModel().getSelectedItem());
-        String msg = String.format("%s", files.getSelectionModel().getSelectedItem());
-
     }
 
     public void saveFileToComputer(ActionEvent actionEvent) {
@@ -313,6 +311,9 @@ public class Controller implements Initializable {
                 String absolutePath = Paths.get(path, selectedItem.Name).toFile().getAbsolutePath();
                 if (saveToFile(absolutePath, content)) {
                     System.out.println(Command.DOWNLOAD_FILE_OK);
+                    sendNotification(Command.DOWNLOAD_FILE_OK);
+                } else {
+                    sendNotification(Command.DOWNLOAD_FILE_DENIED);
                 }
             }
         } catch (Exception e) {
@@ -320,6 +321,7 @@ public class Controller implements Initializable {
         }
     }
 
+    //to thirdPartyModule
     public static boolean saveToFile(String pathToSave, byte[] content) {
         if (!exist(pathToSave)) {
             if (!createDirectory(pathToSave)) {
@@ -359,5 +361,11 @@ public class Controller implements Initializable {
             return false;
         }
         return false;
+    }
+
+    public void sendNotification(String msg) {
+        if (msg != null) {
+            this.text.setText(msg);
+        }
     }
 }

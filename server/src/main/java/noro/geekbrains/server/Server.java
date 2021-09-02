@@ -26,9 +26,9 @@ public class Server {
     private DataOutputStream onlyDataOut;
     private DataOutputStream out;
 
-    private List<ClientHandler> clients;
-    private AuthService authService;
-    private ExecutorService executorService;
+    private final List<ClientHandler> clients;
+    private final AuthService authService;
+    private final ExecutorService executorService;
 
     public ExecutorService getExecutorService() {
         return executorService;
@@ -51,8 +51,8 @@ public class Server {
             while (true) {
                 socket = server.accept();
                 onlyDataSocket = onlyDataServer.accept();
-                socket.setSoTimeout(100_000);
-                onlyDataSocket.setSoTimeout(100_000);
+                socket.setSoTimeout(100_000_000);
+                onlyDataSocket.setSoTimeout(100_000_000);
                 System.out.println("Client connected");
                 System.out.println("client: " + socket.getRemoteSocketAddress());
                 new ClientHandler(this, socket, onlyDataSocket);
@@ -79,20 +79,6 @@ public class Server {
         for (ClientHandler c : clients) {
             c.sendMsg(message);
         }
-    }
-
-    public void privateMsg(ClientHandler sender, String receiver, String msg) {
-        String message = String.format("[ %s ] to [ %s ]: %s", sender.getLogin(), receiver, msg);
-        for (ClientHandler c : clients) {
-            if (c.getLogin().equals(receiver)) {
-                c.sendMsg(message);
-                if (!c.equals(sender)) {
-                    sender.sendMsg(message);
-                }
-                return;
-            }
-        }
-        sender.sendMsg("not found user: " + receiver);
     }
 
     public void subscribe(ClientHandler clientHandler) {

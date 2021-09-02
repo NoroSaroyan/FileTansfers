@@ -5,8 +5,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayOutputStream;
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,8 +12,7 @@ public class Mapper {
     public static String objectToString(DbFiles dbFiles) {
         try {
             ObjectMapper om = new ObjectMapper();
-            String str = om.writeValueAsString(dbFiles);
-            return str;
+            return om.writeValueAsString(dbFiles);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -48,9 +45,7 @@ public class Mapper {
     public static DbFiles stringToObject(String str) {
         try {
             ObjectMapper om = new ObjectMapper();
-            Reader reader = new StringReader(str);
-            DbFiles dbFile = om.readValue(str, DbFiles.class);
-            return dbFile;
+            return om.readValue(str, DbFiles.class);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

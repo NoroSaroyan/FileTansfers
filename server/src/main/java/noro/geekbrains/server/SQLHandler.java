@@ -9,8 +9,6 @@ import java.util.List;
 public class SQLHandler {
     private static Connection connection;
     private static PreparedStatement psRegistration;
-    private static PreparedStatement psChangeUserName;
-    private static PreparedStatement psChangePassword;
     private static PreparedStatement psLogin;
     private static PreparedStatement psInsertFile;
     private static PreparedStatement psGetUserFiles;
@@ -31,8 +29,6 @@ public class SQLHandler {
 
     private static void prepareAllStatements() throws SQLException {
         psRegistration = connection.prepareStatement("INSERT INTO clients(name, password) VALUES (? ,? );");
-        psChangeUserName = connection.prepareStatement("UPDATE clients SET name = ? WHERE name = ? AND password = ? ;");
-        psChangePassword = connection.prepareStatement("Update clients SET password = ? WHERE name = ? AND Password = ?;");
         psLogin = connection.prepareStatement("Select name from clients where name = ? AND password = ?;");
         psInsertFile = connection.prepareStatement("Insert INTO files(name , username , path) VALUES (?,?,?);");
         psGetUserFiles = connection.prepareStatement("select * from files where username = ?;");
@@ -85,7 +81,6 @@ public class SQLHandler {
         return null;
     }
 
-
     public static boolean insertFile(String name, String username, String path) {
         try {
             psInsertFile.setString(1, name);
@@ -110,33 +105,6 @@ public class SQLHandler {
         }
     }
 
-    public static boolean changeUserName(String oldUsername, String password, String newUserName) {
-        try {
-
-            psChangeUserName.setString(1, newUserName);
-            psChangeUserName.setString(2, oldUsername);
-            psChangePassword.setString(3, password);
-            psChangeUserName.executeUpdate();
-
-            return true;
-        } catch (SQLException e) {
-            return false;
-        }
-    }
-
-    public static boolean changePassword(String username, String oldPassword, String newPassword) {
-        try {
-
-            psChangePassword.setString(1, newPassword);
-            psChangeUserName.setString(2, username);
-            psChangePassword.setString(3, oldPassword);
-            psChangeUserName.executeUpdate();
-            return true;
-        } catch (SQLException e) {
-            return false;
-        }
-    }
-
     public static boolean deleteFile(int id) {
         try {
             psDeleteFile.setInt(1, id);
@@ -153,7 +121,7 @@ public class SQLHandler {
             psLogin.setString(1, username);
             psLogin.setString(2, password);
             return psLogin.execute();
-        } catch (SQLException throwables) {
+        } catch (SQLException throwable) {
             return false;
         }
     }
@@ -161,10 +129,11 @@ public class SQLHandler {
     public static void disconnect() {
         try {
             psRegistration.close();
-            psChangeUserName.close();
-            psChangeUserName.close();
-            psChangePassword.close();
             psLogin.close();
+            psDeleteFile.close();
+            psLogin.close();
+            psGetUserFiles.close();
+            psGetFileById.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

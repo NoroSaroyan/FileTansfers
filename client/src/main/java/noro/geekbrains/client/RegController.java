@@ -21,7 +21,7 @@ public class RegController {
     @FXML
     private TextArea textArea;
 
-    private String path = "D:\\FileTransfers\\Users\\";
+    private final String path = "D:\\FileTransfers\\Users\\";
 
     private Controller controller;
 

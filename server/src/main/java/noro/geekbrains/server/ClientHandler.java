@@ -1,6 +1,5 @@
 package noro.geekbrains.server;
 
-
 import noro.geekbrains.*;
 
 import java.io.*;
@@ -8,6 +7,8 @@ import java.net.Socket;
 import java.nio.file.*;
 import java.util.Arrays;
 import java.util.List;
+
+import static noro.geekbrains.FileHandler.saveContentToFile;
 
 public class ClientHandler {
     private Server server;
@@ -42,7 +43,7 @@ public class ClientHandler {
                     while (true) {
                         String str = in.readUTF();
                         if (str.equals(Command.END)) {
-                           handleCommandEnd(str);
+                            handleCommandEnd(str);
                         }
                         //если команда аутентификация
                         if (str.startsWith(Command.AUTH)) {
@@ -139,7 +140,6 @@ public class ClientHandler {
 
     private void handleCommandEnd(String str) throws IOException {
         out.writeUTF(Command.END);
-        System.out.println("");
         throw new RuntimeException("Клиент захотел отключиться");
     }
 
@@ -151,7 +151,7 @@ public class ClientHandler {
             byte[] bytes = new byte[size.intValue()];
             onlyDataIn.readFully(bytes);
             String path = "D:\\FileTransfers\\Users\\" + this.login + "\\" + file.Name;
-            if (saveContentToFile(bytes, path)) {
+            if (saveContentToFile(path, bytes)) {
                 SQLHandler.insertFile(file.Name, file.Username, path);
                 sendMsg(Command.INSERT_OK);
             } else {
@@ -160,15 +160,16 @@ public class ClientHandler {
             }
         } else {
             server.broadcastMsg(this, str);
-        }}
+        }
+    }
 
     private void handleDeleteFile(String str) throws IOException {
         String[] data = str.split(Command.DELETE_FILE, 2);
         String fileId = data[1];
         System.out.println("deleted file id =" + fileId);
         DbFiles dbFile = SQLHandler.getFilesById(Integer.parseInt(fileId));
-        System.out.println("got file from db " + dbFile.toString());
         if (dbFile != null) {
+            System.out.println("got file from db " + dbFile.toString());
             File file = new File(dbFile.Path);
             boolean isDeleted = false;
             try {
@@ -190,12 +191,14 @@ public class ClientHandler {
         System.out.println("download file " + data[1]);
         int i = Integer.parseInt(data[1]);
         DbFiles dbFile = SQLHandler.getFilesById(i);
-        System.out.println("    got file from db " + dbFile.toString());
-        byte[] fileContent = Files.readAllBytes(Paths.get(dbFile.Path));
-        System.out.println("    write file content length" + fileContent.length);
-        onlyDataOut.writeLong(fileContent.length);
-        System.out.println("    write file content");
-        onlyDataOut.write(fileContent);
+        if (dbFile != null) {
+            System.out.println("    got file from db " + dbFile.toString());
+            byte[] fileContent = Files.readAllBytes(Paths.get(dbFile.Path));
+            System.out.println("    write file content length" + fileContent.length);
+            onlyDataOut.writeLong(fileContent.length);
+            System.out.println("    write file content");
+            onlyDataOut.write(fileContent);
+        }
     }
 
     private void handleAskAllFile() {
@@ -222,43 +225,6 @@ public class ClientHandler {
         sendMsg(Command.DBFILES_OK + Mapper.objectToString(userFiles));
         System.out.println("client: " + socket.getRemoteSocketAddress() +
                 " connected with login: " + login);
-    }
-
-
-    //Saves users file to servers hard drive
-    public static boolean saveContentToFile(byte[] arr, String path) throws Exception {
-        if (!exist(path)) {
-            if (!createDirectory(path)) {
-                return false;
-            }
-        }
-        try {
-            OutputStream out = new FileOutputStream(new File(path));
-            out.write(arr);
-            out.close();
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public static boolean exist(String path) {
-        return new File(path).exists();
-    }
-
-    public static boolean createDirectory(String p) {
-        if (!exist(p)) {
-            try {
-                Path path = Paths.get(p).getParent();
-                Files.createDirectories(path);
-                return true;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            return false;
-        }
-        return false;
+        System.out.println("socket :" + onlyDataSocket.getRemoteSocketAddress() + "is working");
     }
 }

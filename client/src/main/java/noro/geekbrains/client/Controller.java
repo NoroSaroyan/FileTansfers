@@ -19,11 +19,11 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import static noro.geekbrains.FileHandler.saveContentToFile;
 
 public class Controller implements Initializable {
 
@@ -58,26 +58,25 @@ public class Controller implements Initializable {
     private String username;
     private Stage stage;
     private Stage regStage;
-    private String login;
     private RegController regController;
 
     public void setAuthenticated(boolean authenticated) {
         this.authenticated = authenticated;
-        authPanel.setVisible(!authenticated);
-        authPanel.setManaged(!authenticated);
+        authPanel.setVisible(!this.authenticated);
+        authPanel.setManaged(!this.authenticated);
 
-        text.setVisible(authenticated);
+        text.setVisible(this.authenticated);
         text.setText("text is showing, commands set with setText() less than 1 sec ");
 
-        files.setVisible(authenticated);
-        files.setManaged(authenticated);
+        files.setVisible(this.authenticated);
+        files.setManaged(this.authenticated);
 
-        download.setVisible(authenticated);
+        download.setVisible(this.authenticated);
 
-        delete.setVisible(authenticated);
-        selectFileButton.setVisible(authenticated);
+        delete.setVisible(this.authenticated);
+        selectFileButton.setVisible(this.authenticated);
 
-        if (!authenticated) {
+        if (!this.authenticated) {
             username = "";
         }
         setTitle(username);
@@ -123,6 +122,7 @@ public class Controller implements Initializable {
                         if (str.startsWith("/")) {
                             if (str.startsWith(Command.AUTH_OK)) {
                                 handleAuthOk(str);
+                                sendNotification(Command.AUTH_OK);
                                 break;
                             }
                             if (str.equals(Command.REG_OK)) {
@@ -171,9 +171,8 @@ public class Controller implements Initializable {
             if (socket == null || socket.isClosed()) {
                 connect();
             }
-            login = loginField.getText().trim();
-
-            out.writeUTF(String.format("%s %s %s", Command.AUTH, loginField.getText().trim(), passwordField.getText().trim()));
+            out.writeUTF(String.format("%s %s %s", Command.AUTH, loginField.getText().trim(),
+                    passwordField.getText().trim()));
 
         } catch (NullPointerException | ConnectException e) {
             System.out.println("error");
@@ -239,9 +238,7 @@ public class Controller implements Initializable {
                 DbFiles dbFiles = new DbFiles(12342, file.getName(), this.username, file.getAbsolutePath());
                 String str = Mapper.objectToString(dbFiles);
                 out.writeUTF(Command.INSERT_FILE + str);
-
                 byte[] fileContent = Files.readAllBytes(file.toPath());
-
                 System.out.println("file content size = " + fileContent.length);
                 onlyDataOut.writeLong(fileContent.length);
                 onlyDataOut.write(fileContent);
@@ -273,7 +270,11 @@ public class Controller implements Initializable {
                 files.getItems().add(dbFile);
             }
         });
-        sendNotification(data[0]);
+        if (files != null) {
+            sendNotification(data[0]);
+        } else {
+            sendNotification("Error");
+        }
     }
 
 
@@ -282,14 +283,20 @@ public class Controller implements Initializable {
         try {
             out.writeUTF(Command.DELETE_FILE + file.Id);
             askNewFiles();
-            sendNotification(Command.DELETE_FILE_OK);
+            if (file.Path != null) {
+                sendNotification(Command.DELETE_FILE_OK);
+                sendNotification(Command.DELETE_FILE_OK);
+            } else {
+                sendNotification(Command.DELETE_FILE_NOT_OK);
+                System.out.println("testing");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        sendNotification(Command.DELETE_FILE_NOT_OK);
+
     }
 
-    public void clientListMouseReleased(MouseEvent mouseEvent) throws IOException {
+    public void clientListMouseReleased(MouseEvent mouseEvent) throws NullPointerException {
         System.out.println(files.getSelectionModel().getSelectedItem());
     }
 
@@ -309,7 +316,7 @@ public class Controller implements Initializable {
                 onlyDataIn.readFully(content);
 
                 String absolutePath = Paths.get(path, selectedItem.Name).toFile().getAbsolutePath();
-                if (saveToFile(absolutePath, content)) {
+                if (saveContentToFile(absolutePath, content)) {
                     System.out.println(Command.DOWNLOAD_FILE_OK);
                     sendNotification(Command.DOWNLOAD_FILE_OK);
                 } else {
@@ -319,48 +326,6 @@ public class Controller implements Initializable {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    //to thirdPartyModule
-    public static boolean saveToFile(String pathToSave, byte[] content) {
-        if (!exist(pathToSave)) {
-            if (!createDirectory(pathToSave)) {
-                return false;
-            }
-        }
-
-        try {
-            OutputStream out = new FileOutputStream(new File(pathToSave));
-            out.write(content);
-            out.close();
-            return true;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public static boolean exist(String path) {
-        return new File(path).exists();
-    }
-
-    public static boolean createDirectory(String p) {
-        if (!exist(p)) {
-            try {
-                Path path = Paths.get(p).getParent();
-                Files.createDirectories(path);
-                return true;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            return false;
-        }
-        return false;
     }
 
     public void sendNotification(String msg) {

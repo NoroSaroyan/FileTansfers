@@ -270,7 +270,7 @@ public class Controller implements Initializable {
                 files.getItems().add(dbFile);
             }
         });
-            this.text.setText(Command.DBFILES_OK);
+        this.text.setText(Command.DBFILES_OK);
     }
 
 

@@ -122,7 +122,7 @@ public class Controller implements Initializable {
                         if (str.startsWith("/")) {
                             if (str.startsWith(Command.AUTH_OK)) {
                                 handleAuthOk(str);
-                                sendNotification(Command.AUTH_OK);
+                                this.text.setText(Command.AUTH_OK);
                                 break;
                             }
                             if (str.equals(Command.REG_OK)) {
@@ -141,7 +141,7 @@ public class Controller implements Initializable {
                             System.out.println("<<-" + str);
                             if (str.startsWith(Command.INSERT_OK)) {
                                 System.out.println(Command.INSERT_OK);
-                                sendNotification(Command.INSERT_OK);
+                                this.text.setText(Command.INSERT_OK);
                             }
                             if (str.startsWith(Command.DBFILES_OK)) {
                                 handleDbFilesOk(str);
@@ -243,7 +243,7 @@ public class Controller implements Initializable {
                 onlyDataOut.writeLong(fileContent.length);
                 onlyDataOut.write(fileContent);
                 askNewFiles();
-                sendNotification(Command.INSERT_OK);
+                this.text.setText(Command.INSERT_OK);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -270,11 +270,7 @@ public class Controller implements Initializable {
                 files.getItems().add(dbFile);
             }
         });
-        if (files != null) {
-            sendNotification(data[0]);
-        } else {
-            sendNotification("Error");
-        }
+            this.text.setText(Command.DBFILES_OK);
     }
 
 
@@ -283,14 +279,9 @@ public class Controller implements Initializable {
         try {
             out.writeUTF(Command.DELETE_FILE + file.Id);
             askNewFiles();
-            if (file.Path != null) {
-                sendNotification(Command.DELETE_FILE_OK);
-                sendNotification(Command.DELETE_FILE_OK);
-            } else {
-                sendNotification(Command.DELETE_FILE_NOT_OK);
-                System.out.println("testing");
-            }
+            this.text.setText(Command.DELETE_FILE_OK);
         } catch (Exception e) {
+            this.text.setText(Command.DELETE_FILE_NOT_OK);
             e.printStackTrace();
         }
 
@@ -308,29 +299,20 @@ public class Controller implements Initializable {
             String path = file.getAbsolutePath();
             if (selectedItem != null) {
                 out.writeUTF(Command.DOWNLOAD_FILE + selectedItem.Id.toString());
-
                 Long size = onlyDataIn.readLong();
-
                 byte[] content = new byte[size.intValue()];
-
                 onlyDataIn.readFully(content);
 
                 String absolutePath = Paths.get(path, selectedItem.Name).toFile().getAbsolutePath();
                 if (saveContentToFile(absolutePath, content)) {
                     System.out.println(Command.DOWNLOAD_FILE_OK);
-                    sendNotification(Command.DOWNLOAD_FILE_OK);
+                    this.text.setText(Command.DOWNLOAD_FILE_OK);
                 } else {
-                    sendNotification(Command.DOWNLOAD_FILE_DENIED);
+                    this.text.setText(Command.DOWNLOAD_FILE_DENIED);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-
-    public void sendNotification(String msg) {
-        if (msg != null) {
-            this.text.setText(msg);
         }
     }
 }

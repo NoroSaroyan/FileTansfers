@@ -25,7 +25,8 @@
                     <ListView fx:id="files" managed="false" minWidth="300" onMouseReleased="#clientListMouseReleased" visible="true" />
                     <Button fx:id="download" alignment="CENTER_RIGHT" contentDisplay="CENTER" layoutX="624.0" layoutY="150.0" minWidth="100.0" onAction="#saveFileToComputer" text="Download" visible="true" HBox.hgrow="NEVER" />
 
-                    <Button fx:id="delete" alignment="CENTER" contentDisplay="CENTER" layoutX="624.0" layoutY="105.0" minWidth="100.0" onAction="#deleteFile" text="Delete" visible="true" HBox.hgrow="NEVER" />
+                    <Button fx:id="delete" alignment="CENTER" contentDisplay="CENTER"
+                            layoutX="624.0" layoutY="105.0" minWidth="100.0" onAction="#deleteFile" text="Delete" visible="true" HBox.hgrow="NEVER" />
 
                     <Button fx:id="selectFileButton" alignment="CENTER" contentDisplay="CENTER" layoutX="624.0" layoutY="62.0" minWidth="100.0" onAction="#selectFile" text="Add File" visible="true" />
             

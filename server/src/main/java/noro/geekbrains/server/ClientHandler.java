@@ -2,6 +2,7 @@ package noro.geekbrains.server;
 
 import noro.geekbrains.*;
 
+import java.beans.beancontext.BeanContextChild;
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.*;
@@ -221,7 +222,8 @@ public class ClientHandler {
     public void handleAuthOk(String str) {
         sendMsg(Command.AUTH_OK + " " + login);
         server.subscribe(this);
-        List<DbFiles> userFiles = SQLHandler.getUserFiles(login);
+        List<DbFiles> userFiles = null;
+        userFiles = SQLHandler.getUserFiles(login);
         sendMsg(Command.DBFILES_OK + Mapper.objectToString(userFiles));
         System.out.println("client: " + socket.getRemoteSocketAddress() +
                 " connected with login: " + login);

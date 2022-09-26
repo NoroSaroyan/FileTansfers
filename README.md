@@ -18,11 +18,6 @@ And of course Dillinger itself is open source with a [public repository][dill]
 
 File tansfer requires Java to run.
 
-## Plugins
-
-Dillinger is currently extended with the following plugins.
-Instructions on how to use them in your own application are linked below.
-
 ## Development
 FileTrransfer is a server-client application. It handles requests from client side, creates a response and sends it back to client. It can handle multiple requests from multiple users simultaneously.
 ##### How does it work? 

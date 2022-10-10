@@ -11,9 +11,6 @@ Filetransfer is a server-client demo cloud storage(Dropbox like application), wh
 - "Downloading" files from "storage"
 - Application can save any type of file with unlimited size(limitations may be set by your device)
 
-And of course Dillinger itself is open source with a [public repository][dill]
- on GitHub.
-
 ## How to use?
 
 File tansfer requires Java to run.

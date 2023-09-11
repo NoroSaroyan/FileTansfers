@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox alignment="center" prefHeight="400" prefWidth="400" xmlns="http://javafx.com/javafx/11.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="noro.geekbrains.client.Controller">
+    <stylesheets>
+        <URL value="@/css/style.css" />
+    </stylesheets>
+
+    <HBox fx:id="authPanel" stylesheets="@css/style.css">
+        <TextField fx:id="loginField" prefHeight="39.0" prefWidth="219.0" promptText="login" HBox.hgrow="ALWAYS" />
+        <PasswordField fx:id="passwordField" onAction="#tryToAuth" promptText="password" HBox.hgrow="ALWAYS" />
+        <Button minWidth="100" onAction="#tryToAuth" text="Sign In" />
+        <Button minWidth="100" onAction="#showRegWindow" text="Sign Up" />
+    </HBox>
+    <HBox fx:id="selectFile" />
+
+    <HBox prefHeight="335.0" prefWidth="720.0" stylesheets="@css/style.css" VBox.vgrow="ALWAYS">
+        <children>
+            <AnchorPane HBox.hgrow="ALWAYS">
+                <children>
+                    <ListView fx:id="files" managed="false" minWidth="300" onMouseReleased="#clientListMouseReleased" visible="true" />
+                    <Button fx:id="download" alignment="CENTER_RIGHT" contentDisplay="CENTER" layoutX="624.0" layoutY="150.0" minWidth="100.0" onAction="#saveFileToComputer" text="Download" visible="true" HBox.hgrow="NEVER" />
+
+                    <Button fx:id="delete" alignment="CENTER" contentDisplay="CENTER"
+                            layoutX="624.0" layoutY="105.0" minWidth="100.0" onAction="#deleteFile" text="Delete" visible="true" HBox.hgrow="NEVER" />
+
+                    <Button fx:id="selectFileButton" alignment="CENTER" contentDisplay="CENTER" layoutX="624.0" layoutY="62.0" minWidth="100.0" onAction="#selectFile" text="Add File" visible="true" />
+            
+                    <Text fx:id="text" layoutX="-140" layoutY="-400" managed="false" wrappingWidth="500" x="250" y="420" textAlignment="CENTER" />
+                </children>
+            </AnchorPane>
+        </children>
+
+    </HBox>
+</VBox>
